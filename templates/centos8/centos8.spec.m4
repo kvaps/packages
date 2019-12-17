@@ -105,6 +105,7 @@ BuildRequires: python3-scons
 BuildRequires: /usr/bin/pathfix.py
 %endif
 %if 0%{?rhel} == 7
+BuildRequires: epel-rpm-macros
 BuildRequires: scons
 %endif
 

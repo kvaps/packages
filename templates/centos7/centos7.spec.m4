@@ -67,6 +67,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 # Build Requires
 ################################################################################
 
+BuildRequires: epel-rpm-macros
 BuildRequires: gcc-c++
 BuildRequires: libcurl-devel
 BuildRequires: libxml2-devel
