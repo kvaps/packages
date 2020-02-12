@@ -41,20 +41,22 @@ case "${OPTION}" in
         apt-get -y install \
             ruby-dev make gcc libsqlite3-dev libcurl4-openssl-dev \
             rake libxml2-dev libxslt1-dev patch g++ build-essential \
-            libssl-dev \
+            libssl-dev libaugeas-dev \
             >/dev/null
 
         # default-libmysqlclient-dev OR libmysqlclient-dev
         apt-get -y install default-libmysqlclient-dev >/dev/null 2>&1 || \
             apt-get -y install libmysqlclient-dev >/dev/null
 
+        # workaround missing libxml2 headers on some Ubuntu/Debian
+        ln -s /usr/include/libxml2/libxml /usr/include/libxml || :
         ;;
     'redhat')
         echo "Install build dependencies for ${OPTION}"
 
         yum -y install ruby-devel make gcc sqlite-devel mysql-devel \
             openssl-devel curl-devel rubygem-rake libxml2-devel \
-            libxslt-devel patch expat-devel gcc-c++ rpm-build \
+            libxslt-devel patch expat-devel gcc-c++ rpm-build augeas-devel \
             >/dev/null
         ;;
     *)

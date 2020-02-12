@@ -19,6 +19,7 @@ dist/var/lib/one/remotes/ipam/*               /var/lib/one/remotes/ipam/
 dist/var/lib/one/remotes/market/http/*        /var/lib/one/remotes/market/http/
 dist/var/lib/one/remotes/market/linuxcontainers/*  /var/lib/one/remotes/market/linuxcontainers/
 dist/var/lib/one/remotes/market/virtalus/*    /var/lib/one/remotes/market/virtalus/
+dist/var/lib/one/remotes/market/turnkeylinux/*  /var/lib/one/remotes/market/turnkeylinux/
 dist/var/lib/one/remotes/market/one/*         /var/lib/one/remotes/market/one/
 dist/var/lib/one/remotes/market/s3/*          /var/lib/one/remotes/market/s3/
 dist/var/lib/one/remotes/pm/ec2/*             /var/lib/one/remotes/pm/ec2/

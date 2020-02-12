@@ -1,5 +1,0 @@
-#!/bin/sh
-
-if [ -d /var/lib/one/remotes/ ]; then
-    cp -a /var/lib/one/remotes/ /var/lib/one/remotes.$(date +'%Y-%m-%d_%H:%M:%S')
-fi

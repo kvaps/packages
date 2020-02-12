@@ -33,6 +33,11 @@
 # https://developers.redhat.com/blog/2018/03/21/compiler-and-linker-flags-gcc/
 %global _hardened_build 1
 
+# OneScape
+%define onescape_etc /etc/onescape
+%define onescape_cfg %{onescape_etc}/config.yaml
+%define onescape_bak %{oneadmin_home}/backups/config
+
 Name: opennebula
 Version: _VERSION_
 Summary: Cloud computing solution for Data Center Virtualization
@@ -175,7 +180,7 @@ BuildArch: noarch
 Requires: ruby
 Requires: rubygems
 Requires: rubygem-bigdecimal
-Requires: rubygem-json >= 1.7.7, rubygem-json < 1.8
+Requires: rubygem-json >= 1.7.7-30, rubygem-json < 1.8
 Requires: rubygem-io-console
 Requires: rubygem-psych
 %if %{with_rubygems}
@@ -556,6 +561,87 @@ if ! getent group disk | grep '\boneadmin\b' &>/dev/null; then
     usermod -a -G disk oneadmin
 fi
 
+### Backup configuration ###
+
+# better fail silently than break installation
+set +e
+
+# create OneScape directory
+if [ ! -d '%{onescape_etc}' ]; then
+    mkdir -p '%{onescape_etc}'
+fi
+
+# create backup directory
+if [ ! -d '%{onescape_bak}' ]; then
+    mkdir -p '%{onescape_bak}'
+    chmod 700 '%{onescape_bak}'
+    chown 'root:root' '%{onescape_bak}'
+
+    # FIX: parent directory, just safety check if we would change onescape_bak
+    if [ -d '%{oneadmin_home}/backups' ]; then
+        chmod 700 '%{oneadmin_home}/backups'
+        chown '%{oneadmin_uid}:%{oneadmin_gid}' '%{oneadmin_home}/backups'
+    fi
+fi
+
+# upgrade
+if [ "$1" = '2' ]; then
+    # poor detection of old version
+    PREV_VERSION=${PREV_VERSION:-$(oned --version 2>/dev/null | grep '^OpenNebula [0-9.]*[[:space:]]' | cut -d' ' -f2)}
+    PREV_VERSION=${PREV_VERSION:-$(grep -x "^[[:space:]]*VERSION = '[0-9.]*'[[:space:]]*" /usr/lib/one/ruby/opennebula.rb | cut -d"'" -f2)}
+    PREV_VERSION=${PREV_VERSION:-$(cat /var/lib/one/remotes/VERSION 2>/dev/null)}
+
+    # backup configuration
+    BACKUP_DIR="%{onescape_bak}/$(date +'%Y-%m-%d_%H:%M:%%S')-v${PREV_VERSION:-UNKNOWN}"
+    mkdir "${BACKUP_DIR}"
+    chmod 700 "${BACKUP_DIR}"
+
+    for DIR in '/etc/one' '/var/lib/one/remotes'; do
+        if [ -d "${DIR}" ]; then
+            # We try to mimic filesystem structure in backups, e.g.
+            # /etc/one/oned.conf -> $BACKUP_DIR/etc/one/oned.conf
+            DIR_PARENT="$(dirname "${DIR}")"
+            mkdir -p "${BACKUP_DIR}/${DIR_PARENT}"
+            cp -a "${DIR}" "${BACKUP_DIR}/${DIR_PARENT}"
+        fi
+    done
+
+    if [ -f '%{onescape_cfg}' ]; then
+       # if it already contains backup, we put obsolete
+       # flag and don't modify backup again.
+       if grep -qF 'backup:' '%{onescape_cfg}'; then
+           if ! grep -qF 'outdated: true' '%{onescape_cfg}'; then
+               printf "\noutdated: true\n" >> '%{onescape_cfg}'
+           fi
+       else
+           printf "\nbackup: '%%s'\n" "${BACKUP_DIR}" >> '%{onescape_cfg}'
+       fi
+    else
+        # create new configuration
+        cat - <<EOF >'%{onescape_cfg}'
+---
+backup: '${BACKUP_DIR}'
+EOF
+
+        # and, put version inside if known
+        if [ -n "${PREV_VERSION}" ]; then
+            printf "\nversion: '%%s'\n" "${PREV_VERSION}" >> '%{onescape_cfg}'
+        fi
+    fi
+fi
+
+# install
+if [ "$1" = '1' ]; then
+    cat - <<EOF >'%{onescape_cfg}'
+---
+version: '%{version}'
+EOF
+fi
+
+# pass silently
+set -e
+/bin/true
+
 %post common
 if [ $1 = 1 ]; then
     # only on install once again fix directory SELinux type
@@ -572,10 +658,6 @@ fi
 if [ $1 = 2 ]; then
     /sbin/service opennebula stop >/dev/null || :
     /sbin/service opennebula-scheduler stop >/dev/null || :
-fi
-
-if [ -d /var/lib/one/remotes/ ]; then
-    cp -a /var/lib/one/remotes/ /var/lib/one/remotes.$(date +'%Y-%m-%d_%H:%M:%%S')
 fi
 
 %post server
@@ -1219,6 +1301,7 @@ echo ""
 %dir %{_sharedstatedir}/one/remotes/market
 %dir %{_sharedstatedir}/one/remotes/market/http
 %dir %{_sharedstatedir}/one/remotes/market/linuxcontainers
+%dir %{_sharedstatedir}/one/remotes/market/turnkeylinux
 %dir %{_sharedstatedir}/one/remotes/market/one
 %dir %{_sharedstatedir}/one/remotes/market/s3
 %dir %{_sharedstatedir}/one/remotes/pm
@@ -1260,6 +1343,7 @@ echo ""
 %{_sharedstatedir}/one/remotes/ipam/*
 %{_sharedstatedir}/one/remotes/market/http/*
 %{_sharedstatedir}/one/remotes/market/linuxcontainers/*
+%{_sharedstatedir}/one/remotes/market/turnkeylinux/*
 %{_sharedstatedir}/one/remotes/market/one/*
 %{_sharedstatedir}/one/remotes/market/s3/*
 %{_sharedstatedir}/one/remotes/pm/dummy/*
