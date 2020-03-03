@@ -42,6 +42,7 @@ case "${OPTION}" in
             ruby-dev make gcc libsqlite3-dev libcurl4-openssl-dev \
             rake libxml2-dev libxslt1-dev patch g++ build-essential \
             libssl-dev libaugeas-dev \
+            postgresql-server-dev-all \
             >/dev/null
 
         # default-libmysqlclient-dev OR libmysqlclient-dev
@@ -57,6 +58,7 @@ case "${OPTION}" in
         yum -y install ruby-devel make gcc sqlite-devel mysql-devel \
             openssl-devel curl-devel rubygem-rake libxml2-devel \
             libxslt-devel patch expat-devel gcc-c++ rpm-build augeas-devel \
+            postgresql-devel \
             >/dev/null
         ;;
     *)

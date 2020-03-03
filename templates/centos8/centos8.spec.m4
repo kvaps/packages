@@ -98,6 +98,7 @@ BuildRequires: libxml2-devel
 BuildRequires: xmlrpc-c-devel
 BuildRequires: openssl-devel
 BuildRequires: mysql-devel
+BuildRequires: libpq-devel
 BuildRequires: sqlite-devel
 BuildRequires: openssh
 BuildRequires: pkgconfig
