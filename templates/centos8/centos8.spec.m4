@@ -124,6 +124,7 @@ Requires: sqlite
 Requires: openssh-clients
 Requires: less
 
+Obsoletes: %{name}-addon-tools
 Requires: %{name}-common = %{version}
 Requires: %{name}-ruby = %{version}
 %if %{with_rubygems}
@@ -173,6 +174,7 @@ Requires: zeromq >= 4, zeromq < 5
 %endif
 # Devel package brings libzmq.so symlink required by ffi-rzmq-core gem
 Requires: zeromq-devel
+Obsoletes: %{name}-addon-markets
 Obsoletes: %{name}-ozones
 
 %description server

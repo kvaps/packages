@@ -102,6 +102,7 @@ Requires: sqlite
 Requires: openssh-clients
 Requires: less
 
+Obsoletes: %{name}-addon-tools
 Requires: %{name}-common = %{version}
 Requires: %{name}-ruby = %{version}
 %if %{with_rubygems}
@@ -146,6 +147,7 @@ Requires: iputils
 Requires: zeromq >= 4, zeromq < 5
 # Devel package brings libzmq.so symlink required by ffi-rzmq-core gem
 Requires: zeromq-devel
+Obsoletes: %{name}-addon-markets
 Obsoletes: %{name}-ozones
 #TODO: Requires http://rubygems.org/gems/net-ldap
 

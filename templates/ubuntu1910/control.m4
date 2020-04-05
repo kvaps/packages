@@ -57,12 +57,14 @@ Replaces: ruby-opennebula (<< 5.5.80),
           opennebula-sunstone (<< 5.0.2),
           opennebula-flow (<< 5.0.2),
           opennebula-gate (<< 5.0.2),
-          opennebula-common (<< 5.5.80)
+          opennebula-common (<< 5.5.80),
+          opennebula-addon-markets (<< 5.10.2)
 Breaks:  ruby-opennebula (<< 5.5.80),
          opennebula-sunstone (<< 5.0.2),
          opennebula-flow (<< 5.0.2),
          opennebula-gate (<< 5.0.2),
-         opennebula-common (<< 5.5.80)
+         opennebula-common (<< 5.5.80),
+         opennebula-addon-markets (<< 5.10.2)
 Suggests: mysql-server
 Description: controller which executes the OpenNebula cluster services
  OpenNebula is an open source virtual infrastructure engine that enables the
@@ -246,6 +248,7 @@ Depends: ruby,
          libffi6,
          libsqlite3-0,
          libmysqlclient21,
+         libcurl4,
          libaugeas0,
          ${misc:Depends}
 Conflicts: opennebula (<< ${source:Version})
@@ -260,8 +263,10 @@ Depends: opennebula-common (= ${source:Version}),
          less,
          ${misc:Depends},
          ${ruby:Depends}
-Breaks: opennebula (<< 5.5.90)
-Replaces: opennebula (<< 5.5.90)
+Breaks: opennebula (<< 5.5.90),
+        opennebula-addon-tools (<< 5.10.2)
+Replaces: opennebula (<< 5.5.90),
+          opennebula-addon-tools (<< 5.10.2)
 Description: Command-line tools for OpenNebula Cloud
  OpenNebula is an open source virtual infrastructure engine that enables the
  dynamic deployment and re-placement of virtual machines on a pool of physical
