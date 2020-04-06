@@ -181,6 +181,25 @@ Description: empty package to prepare a machine as OpenNebula Node
  This package prepares the machine for being a node in an OpenNebula
  cloud.
 
+Package: opennebula-node-firecracker
+Architecture: any
+Depends: adduser,
+         opennebula-common (= ${source:Version}),
+         ruby,
+         vlan,
+         ipset,
+         pciutils,
+         rsync,
+         cron,
+         augeas-tools,
+         ruby-sqlite3,
+         bsdtar,
+         screen,
+         libvncserver1,
+         e2fsprogs,
+         ${misc:Depends}
+Description: sets up an OpenNebula Firecracker virtualization node
+
 Package: python-pyone
 Section: python
 Architecture: all

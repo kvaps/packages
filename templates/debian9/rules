@@ -129,6 +129,13 @@ ifneq (,$(filter opennebula-node, $(shell dh_listpackages)))
 	dh_install -p opennebula-node share/pkgs/tmpfiles/${DIR_TMPFILES}/opennebula-node.conf \
 		/usr/lib/tmpfiles.d/
 endif
+ifneq (,$(filter opennebula-node-firecracker, $(shell dh_listpackages)))
+	dh_install -p opennebula-node-firecracker share/pkgs/sudoers/opennebula-node-firecracker /etc/sudoers.d/
+	dh_install -p opennebula-node-firecracker share/etc/sysctl.d/bridge-nf-call.conf /etc/sysctl.d/
+	dh_install -p opennebula-node-firecracker share/etc/cron.d/opennebula-node /etc/cron.d/
+	dh_install -p opennebula-node-firecracker share/pkgs/tmpfiles/${DIR_TMPFILES}/opennebula-node.conf \
+		/usr/lib/tmpfiles.d/
+endif
 ifneq (,$(filter opennebula-tools, $(shell dh_listpackages)))
 	cp share/install_gems/${GEMFILE_LOCK}/Gemfile.lock dist/usr/share/one/
 endif
@@ -181,6 +188,9 @@ ifneq (,$(filter opennebula-node, $(shell dh_listpackages)))
 endif
 ifneq (,$(filter opennebula-addon-tools, $(shell dh_listpackages)))
 	chmod 0440 debian/opennebula-addon-tools/etc/sudoers.d/one-extension-serversync
+endif
+ifneq (,$(filter opennebula-node-firecracker, $(shell dh_listpackages)))
+	chmod 0440 debian/opennebula-node-firecracker/etc/sudoers.d/opennebula-node-firecracker
 endif
 
 override_dh_systemd_start:

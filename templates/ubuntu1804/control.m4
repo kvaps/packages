@@ -207,6 +207,25 @@ Conflicts: lxd (<< 3.0.0),
            lxd-client (<< 3.0.0)
 Description: sets up an OpenNebula LXD virtualization node
 
+Package: opennebula-node-firecracker
+Architecture: any
+Depends: adduser,
+         opennebula-common (= ${source:Version}),
+         ruby,
+         vlan,
+         ipset,
+         pciutils,
+         rsync,
+         cron,
+         augeas-tools,
+         ruby-sqlite3,
+         bsdtar,
+         screen,
+         libvncserver1,
+         e2fsprogs,
+         ${misc:Depends}
+Description: sets up an OpenNebula Firecracker virtualization node
+
 Package: python-pyone
 Section: python
 Architecture: all

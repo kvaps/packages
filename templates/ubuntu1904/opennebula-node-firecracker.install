@@ -1,0 +1,3 @@
+src/vmm_mad/remotes/lib/lxd/svncterm_server/svncterm_server            /usr/bin/
+src/vmm_mad/remotes/lib/firecracker/one-clean-firecracker-domain       /usr/sbin/
+dist/usr/sbin/install-firecracker                                      /usr/sbin/
