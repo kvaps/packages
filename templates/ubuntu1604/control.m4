@@ -219,7 +219,7 @@ Depends: adduser,
          augeas-tools,
          ruby-sqlite3,
          bsdtar,
-         screen.
+         screen,
          libvncserver1,
          e2fsprogs,
          ${misc:Depends}
