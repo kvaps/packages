@@ -91,6 +91,9 @@ BuildRequires: ws-commons-util
 BuildRequires: xmlrpc-common
 BuildRequires: xmlrpc-client
 BuildRequires: systemd-devel
+BuildRequires: libvncserver-devel
+BuildRequires: gnutls-c++
+BuildRequires: libjpeg-turbo-utils
 
 ################################################################################
 # Requires
@@ -388,6 +391,33 @@ Requires: %{name}-common = %{version}
 Configures an OpenNebula node providing kvm.
 
 ################################################################################
+# Package node-firecracker
+################################################################################
+
+%package node-firecracker
+Summary: Configures an OpenNebula node providing firecracker
+Group: System
+Conflicts: %{name}-node-xen
+Requires: ruby
+Requires: openssh-server
+Requires: openssh-clients
+Requires: rsync
+Requires: nfs-utils
+Requires: ipset
+Requires: cronie
+Requires: rubygem-sqlite3
+Requires: libvncserver
+Requires: screen
+Requires: bsdtar
+Requires: e2fsprogs
+Requires: lsof
+# This package does not exist in CentOS 7
+Requires: %{name}-common = %{version}
+
+%description node-firecracker
+Configures an OpenNebula node providing firecracker.
+
+################################################################################
 # Package node-xen
 ################################################################################
 
@@ -454,7 +484,9 @@ OpenNebula provisioning tool
 
 # Compile OpenNebula
 # scons -j2 mysql=yes new_xmlrpc=yes
-../build_opennebula.sh systemd=yes svncterm=no gitversion='%{gitversion}'
+ln -s /lib64/libgnutls.so.28.43.3 /lib64/libgnutls.so
+ln -s /lib64/libjpeg.so.62.1.0 /lib64/libjpeg.so
+../build_opennebula.sh systemd=yes gitversion='%{gitversion}'
 cd src/oca/java
 ./build.sh -d
 
@@ -502,6 +534,7 @@ install -p -D -m 644 %{SOURCE1} \
 install -p -D -m 440 share/pkgs/sudoers/%{dir_sudoers}/opennebula %{buildroot}%{_sysconfdir}/sudoers.d/opennebula
 install -p -D -m 440 share/pkgs/sudoers/opennebula-server %{buildroot}%{_sysconfdir}/sudoers.d/opennebula-server
 install -p -D -m 440 share/pkgs/sudoers/opennebula-node   %{buildroot}%{_sysconfdir}/sudoers.d/opennebula-node
+install -p -D -m 440 share/pkgs/sudoers/opennebula-node-firecracker   %{buildroot}%{_sysconfdir}/sudoers.d/opennebula-node-firecracker
 
 # logrotate
 %{__mkdir} -p %{buildroot}%{_sysconfdir}/logrotate.d
@@ -535,6 +568,10 @@ cd src/oca/python
 make install ROOT=%{buildroot}
 make install3 ROOT=%{buildroot}
 cd -
+
+# Firecracker
+install -p -D -m 755 src/vmm_mad/remotes/lib/lxd/svncterm_server/svncterm_server            %{buildroot}%{_bindir}/svncterm_server
+install -p -D -m 755 src/vmm_mad/remotes/lib/firecracker/one-clean-firecracker-domain       %{buildroot}%{_sbindir}/one-clean-firecracker-domain
 
 # fix permissions
 %{__chmod} -R o-rwx %{buildroot}/var/lib/one/remotes
@@ -802,8 +839,32 @@ EOF
     fi
 fi
 
+################################################################################
+# node-firecracker - scripts
+################################################################################
 
+%post node-firecracker
+# Install
 
+# Install firecracker + jailer
+/usr/sbin/install-firecracker
+
+# Changes ownership of chroot folder
+mkdir -p /srv/jailer/firecracker
+chown -R oneadmin:oneadmin /srv/jailer
+chmod 750 /srv/jailer
+
+if [ $1 = 2 ]; then
+    # Upgrade
+    PID=$(cat /tmp/one-monitord-client.pid 2> /dev/null)
+    [ -n "$PID" ] && kill $PID 2> /dev/null || :
+fi
+
+%postun node-firecracker
+if [ $1 = 0 ]; then
+    rm -f /usr/bin/firecracker
+    rm -f /usr/bin/jailer
+fi
 
 ################################################################################
 # provision - scripts
@@ -986,6 +1047,19 @@ echo ""
 %config %{_sysconfdir}/sysctl.d/bridge-nf-call.conf
 %config %{_sysconfdir}/cron.d/opennebula-node
 %attr(0440, root, root) %config %{_sysconfdir}/sudoers.d/opennebula-node
+/lib/tmpfiles.d/opennebula-node.conf
+
+################################################################################
+# node-firecracker - files
+################################################################################
+
+%files node-firecracker
+%config %{_sysconfdir}/sysctl.d/bridge-nf-call.conf
+%config %{_sysconfdir}/cron.d/opennebula-node
+%attr(0755, root, root) %{_sbindir}/install-firecracker
+%{_sbindir}/one-clean-firecracker-domain
+%{_bindir}/svncterm_server
+%attr(0440, root, root) %config %{_sysconfdir}/sudoers.d/opennebula-node-firecracker
 /lib/tmpfiles.d/opennebula-node.conf
 
 ################################################################################
