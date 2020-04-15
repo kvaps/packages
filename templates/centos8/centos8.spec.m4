@@ -120,7 +120,6 @@ BuildRequires: scons
 
 Requires: openssl
 Requires: openssh
-Requires: sqlite
 Requires: openssh-clients
 Requires: less
 
@@ -157,6 +156,7 @@ This package provides the CLI interface.
 Summary: Provides the OpenNebula servers
 Group: System
 Requires: %{name} = %{version}
+Requires: sqlite
 Requires: openssh-server
 Requires: genisoimage
 Requires: qemu-img
