@@ -105,13 +105,13 @@ BuildRequires: ruby
 BuildRequires: sqlite-devel
 BuildRequires: systemd-devel
 BuildRequires: libvncserver-devel
-BuildRequires: gnutls-c++
-BuildRequires: libjpeg-turbo-utils
+BuildRequires: gnutls-devel
+BuildRequires: libjpeg-turbo-devel
 %if 0%{?rhel} == 8
 BuildRequires: python3-rpm-macros
 BuildRequires: python3-scons
 BuildRequires: /usr/bin/pathfix.py
-BuildRequires: libnsl
+BuildRequires: libnsl2-devel
 %endif
 %if 0%{?rhel} == 7
 BuildRequires: epel-rpm-macros
@@ -544,16 +544,6 @@ mv java-oca-%{version}/jar/ src/oca/java/
     tar xzvf %{SOURCE2}
     cp %{SOURCE3} %{SOURCE4} .
 )
-
-%if 0%{?rhel} == 7
-ln -s /lib64/libgnutls.so.28.43.3 /lib64/libgnutls.so
-ln -s /lib64/libjpeg.so.62.1.0 /lib64/libjpeg.so
-%endif
-%if 0%{?rhel} == 8
-ln -s /lib64/libgnutls.so.30.24.0 /lib64/libgnutls.so
-ln -s /lib64/libjpeg.so.62.2.0 /lib64/libjpeg.so
-ln -s /lib64/libnsl.so.2.0.0 /lib64/libnsl.so
-%endif
 
 # Compile OpenNebula
 # scons -j2 mysql=yes new_xmlrpc=yes

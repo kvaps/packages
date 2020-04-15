@@ -92,8 +92,8 @@ BuildRequires: xmlrpc-common
 BuildRequires: xmlrpc-client
 BuildRequires: systemd-devel
 BuildRequires: libvncserver-devel
-BuildRequires: gnutls-c++
-BuildRequires: libjpeg-turbo-utils
+BuildRequires: gnutls-devel
+BuildRequires: libjpeg-turbo-devel
 
 ################################################################################
 # Requires
@@ -484,8 +484,6 @@ OpenNebula provisioning tool
 
 # Compile OpenNebula
 # scons -j2 mysql=yes new_xmlrpc=yes
-ln -s /lib64/libgnutls.so.28.43.3 /lib64/libgnutls.so
-ln -s /lib64/libjpeg.so.62.1.0 /lib64/libjpeg.so
 ../build_opennebula.sh systemd=yes gitversion='%{gitversion}'
 cd src/oca/java
 ./build.sh -d
