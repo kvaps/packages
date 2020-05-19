@@ -1,3 +1,4 @@
 src/svncterm_server/svncterm_server                                    /usr/bin/
 src/vmm_mad/remotes/lib/firecracker/one-clean-firecracker-domain       /usr/sbin/
+src/vmm_mad/remotes/lib/firecracker/one-prepare-firecracker-domain     /usr/sbin/
 dist/usr/sbin/install-firecracker                                      /usr/sbin/

@@ -783,6 +783,7 @@ pathfix.py -pni "%{__python3} %{py3_shbang_opts}" %{buildroot}/usr/share/one/web
 # Firecracker
 install -p -D -m 755 src/svncterm_server/svncterm_server                                    %{buildroot}%{_bindir}/svncterm_server
 install -p -D -m 755 src/vmm_mad/remotes/lib/firecracker/one-clean-firecracker-domain       %{buildroot}%{_sbindir}/one-clean-firecracker-domain
+install -p -D -m 755 src/vmm_mad/remotes/lib/firecracker/one-prepare-firecracker-domain     %{buildroot}%{_sbindir}/one-prepare-firecracker-domain
 
 # fix permissions
 %{__chmod} -R o-rwx %{buildroot}/var/lib/one/remotes
@@ -1304,6 +1305,7 @@ echo ""
 %config %{_sysconfdir}/cron.d/opennebula-node
 %attr(0755, root, root) %{_sbindir}/install-firecracker
 %{_sbindir}/one-clean-firecracker-domain
+%{_sbindir}/one-prepare-firecracker-domain
 %{_bindir}/svncterm_server
 %attr(0440, root, root) %config %{_sysconfdir}/sudoers.d/opennebula-node-firecracker
 
