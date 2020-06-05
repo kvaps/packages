@@ -261,6 +261,7 @@ Depends: adduser,
          screen,
          libvncserver1,
          e2fsprogs,
+         qemu-utils,
          ${misc:Depends}
 Description: sets up an OpenNebula Firecracker virtualization node
 

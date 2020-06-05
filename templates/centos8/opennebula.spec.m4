@@ -616,6 +616,7 @@ Requires: screen
 Requires: bsdtar
 Requires: e2fsprogs
 Requires: lsof
+Requires: qemu-img
 # This package does not exist in CentOS 7
 Requires: %{name}-common = %{version}
 
