@@ -1735,6 +1735,8 @@ sleep 10
 /usr/lib/one/ruby/PublicCloudDriver.rb
 %dir /usr/lib/one/sh
 /usr/lib/one/sh/*
+%dir /usr/share/one/conf
+/usr/share/one/conf/*
 
 %{_mandir}/man1/onedb.1*
 %doc LICENSE LICENSE.onsla LICENSE.onsla-nc NOTICE
