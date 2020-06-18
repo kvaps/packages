@@ -1152,10 +1152,9 @@ fi
 ################################################################################
 
 %post node-firecracker
-# Install
 
 # Install firecracker + jailer
-/usr/sbin/install-firecracker
+/usr/sbin/install-firecracker || exit $?
 
 # Changes ownership of chroot folder
 mkdir -p /srv/jailer/firecracker
