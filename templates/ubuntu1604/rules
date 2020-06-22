@@ -109,6 +109,11 @@ endif
 ifneq (,$(filter opennebula-rubygems, $(shell dh_listpackages)))
 	cp -a opennebula-rubygems-*/gems-dist dist/usr/share/one/
 endif
+ifneq (,$(filter opennebula-migration, $(shell dh_listpackages)))
+	echo EE > dist/var/lib/one/remotes/EDITION
+else
+	echo CE > dist/var/lib/one/remotes/EDITION
+endif
 	dh_auto_install
 ifneq (,$(filter opennebula-common, $(shell dh_listpackages)))
 	dh_install -p opennebula-common share/pkgs/sudoers/${DIR_SUDOERS}/opennebula \

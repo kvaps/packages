@@ -690,6 +690,12 @@ pushd one-ee-tools
 popd
 %endif
 
+%if %{with_enterprise}
+echo EE > %{buildroot}/%{_sharedstatedir}/one/remotes/EDITION
+%else
+echo CE > %{buildroot}/%{_sharedstatedir}/one/remotes/EDITION
+%endif
+
 %if %{with_rubygems}
 cp -a opennebula-rubygems-%{version}/gems-dist %{buildroot}/usr/share/one/
 %endif
