@@ -196,6 +196,7 @@ Architecture: all
 Depends: adduser,
          libvirt-bin,
          qemu-kvm | pve-qemu-kvm,
+         qemu-utils,
          opennebula-common (= ${source:Version}),
          ruby,
          vlan,
