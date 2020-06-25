@@ -59,4 +59,5 @@ cd "${BUILD_DIR}"
     postgresql=yes \
     xmlrpc="${BUILD_DIR}/../xmlrpc-c/install" \
     new_xmlrpc=yes \
+    context=yes\
     "$@"

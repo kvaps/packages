@@ -1705,6 +1705,8 @@ sleep 10
 %{_datadir}/one/start-scripts/*
 %dir %{_datadir}/one/schemas
 %{_datadir}/one/schemas/*
+%dir %{_datadir}/one/context
+%{_datadir}/one/context/*
 
 %dir /usr/lib/one/mads
 /usr/lib/one/mads/*
