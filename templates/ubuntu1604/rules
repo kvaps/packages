@@ -183,6 +183,8 @@ ifneq (,$(filter opennebula-node-firecracker, $(shell dh_listpackages)))
 endif
 ifneq (,$(filter opennebula-tools, $(shell dh_listpackages)))
 	cp share/install_gems/${GEMFILE_LOCK}/Gemfile.lock dist/usr/share/one/
+	mkdir -p dist/etc/bash_completion.d/
+	cp share/shell/bash_completion dist/etc/bash_completion.d/
 endif
 ifneq (,$(filter python-pyone, $(shell dh_listpackages)))
 	(cd src/oca/python/; make install ROOT=../../../dist)

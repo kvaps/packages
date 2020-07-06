@@ -751,6 +751,9 @@ install -p -D -m 644 share/etc/cron.d/opennebula-node %{buildroot}%{_sysconfdir}
 # Gemfile
 install -p -D -m 644 share/install_gems/%{gemfile_lock}/Gemfile.lock %{buildroot}/usr/share/one/Gemfile.lock
 
+# Shell completion
+install -p -D -m 644 share/shell/bash_completion          %{buildroot}%{_sysconfdir}/bash_completion.d/one
+
 # oned.aug
 %{__mkdir} -p %{buildroot}/usr/share/augeas/lenses
 install -p -D -m 644 share/augeas/oned.aug %{buildroot}/usr/share/augeas/lenses/oned.aug
@@ -1783,6 +1786,7 @@ sleep 10
 
 /usr/share/one/onetoken.sh
 
+/etc/bash_completion.d/one
 
 ################################################################################
 # Changelog
