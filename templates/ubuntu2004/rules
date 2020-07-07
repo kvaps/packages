@@ -183,7 +183,7 @@ endif
 ifneq (,$(filter opennebula-tools, $(shell dh_listpackages)))
 	cp share/install_gems/${GEMFILE_LOCK}/Gemfile.lock dist/usr/share/one/
 	mkdir -p dist/etc/bash_completion.d/
-	cp share/shell/bash_completion dist/etc/bash_completion.d/
+	cp share/shell/bash_completion dist/etc/bash_completion.d/one
 endif
 ifneq (,$(filter python3-pyone, $(shell dh_listpackages)))
 	(cd src/oca/python/; make install3 ROOT=../../../dist)
