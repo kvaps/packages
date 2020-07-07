@@ -167,6 +167,7 @@ Requires: openssh-clients
 Requires: less
 Requires: gnuplot
 # Recommends: gnuplot   # TODO: we are missing repository metadata to handle weak dependencies
+Requires: bash-completion
 
 Obsoletes: %{name}-addon-tools
 Requires: %{name}-common = %{version}

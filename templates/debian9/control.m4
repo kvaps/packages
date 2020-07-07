@@ -302,7 +302,8 @@ Depends: opennebula-common (= ${source:Version}),
          less,
          ${misc:Depends},
          ${ruby:Depends}
-Recommends: gnuplot-nox
+Recommends: gnuplot-nox,
+            bash-completion
 Breaks: opennebula (<< 5.5.90),
         opennebula-addon-tools (<< 5.10.2)
 Replaces: opennebula (<< 5.5.90),

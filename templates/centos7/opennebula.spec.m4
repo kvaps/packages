@@ -131,6 +131,7 @@ Requires: openssh
 Requires: openssh-clients
 Requires: less
 Requires: gnuplot
+Requires: bash-completion
 
 Obsoletes: %{name}-addon-tools
 Requires: %{name}-common = %{version}
