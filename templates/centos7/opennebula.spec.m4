@@ -475,7 +475,28 @@ License: OpenNebula Software License for Non-Commercial Use
 Summary: Migration tools for OpenNebula Community Edition
 BuildArch: noarch
 Requires: %{name}-server >= 5.12, %{name}-server < 5.13
-Obsoletes: %{name}-migration
+###
+# WARNING: Yum considers this package automatically as replacement of
+# (EE) migration package and tries to replace it ALWAYS on upgrade!
+# (even though there is no community package installed before):
+#
+# Resolving Dependencies
+# --> Running transaction check
+# ---> Package opennebula-migration.noarch 0:5.12.1-2.ee.el7 will be obsoleted
+# --> Processing Dependency: opennebula-migration = 5.12.1 for package: opennebula-server-5.12.1-2.ee.el7.x86_64
+# ---> Package opennebula-migration-community.noarch 0:5.12.1-2.ee.el7 will be obsoleting
+# --> Finished Dependency Resolution
+# Error: Package: opennebula-server-5.12.1-2.ee.el7.x86_64 (@opennebula)
+#            Requires: opennebula-migration = 5.12.1
+#            Removing: opennebula-migration-5.12.1-2.ee.el7.noarch (@opennebula)
+#                opennebula-migration = 5.12.1-2.ee.el7
+#            Obsoleted By: opennebula-migration-community-5.12.1-2.ee.el7.noarch (opennebula)
+#                Not found
+#  You could try using --skip-broken to work around the problem
+#  You could try running: rpm -Va --nofiles --nodigest
+###
+#DON'T USE# Obsoletes: %{name}-migration
+Conflicts: %{name}-migration
 
 %description migration-community
 Migration tools for OpenNebula Community Edition
