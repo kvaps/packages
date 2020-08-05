@@ -2,6 +2,8 @@
 
 set -e -o pipefail
 
+export LANG="en_US.UTF-8"
+
 # distro code name
 DISTRO=$(basename "$0")
 DISTRO=${DISTRO%.*}
@@ -38,12 +40,11 @@ cd "$(dirname "$0")"
 
 BUILD_DIR=$(mktemp -d)
 BUILD_DIR_SPKG=$(mktemp -d)
-PACKAGES_DIR="${PWD}"
-SOURCES_DIR="${PWD}/sources"
+PACKAGES_DIR=$(realpath "${PWD}")
+SOURCES_DIR="${PACKAGES_DIR}/sources"
 
 URL="$1"
 PKG_VERSION=${2:-1}
-LOCAL_URL=$(readlink -f "${URL}" || :)
 
 SOURCE=`basename $URL` # opennebula-1.9.90.tar.gz
 PACKAGE=${SOURCE%.tar.gz} # opennebula-1.9.90
@@ -66,19 +67,23 @@ fi
 # Get all sources
 ################################################################################
 
-cd "${BUILD_DIR_SPKG}"
-
 shift || :
 shift || :
 
 echo '***** Prepare sources' >&2
-for S in $URL $@; do
+DPKGS_BUILD_DIR=''
+for S in $URL "$@"; do
     case $S in
         http*)
-            wget -q "${S}"
+            wget -P "${DPKGS_BUILD_DIR:-${BUILD_DIR_SPKG}}"/ -q "${S}"
             ;;
         *)
-            cp "$(readlink --canonicalize "${S}")" .
+            LOCAL_URL=$(readlink -f "${S}" || :)
+            if [ -z "$LOCAL_URL" ] ; then
+                echo "ERROR: URL argument ('${S}') is not a valid URL or a file PATH" >&2
+                exit 1
+            fi
+            cp "${LOCAL_URL}" "${DPKGS_BUILD_DIR:-${BUILD_DIR_SPKG}}"/
             ;;
     esac
 
@@ -90,12 +95,16 @@ for S in $URL $@; do
     # 3. cd into the unpacked directory
     # 4. copy source package files into debian/
     if [ "${S}" = "${URL}" ]; then
+        cd "${BUILD_DIR_SPKG}"
         tar -xzf "${SOURCE}"
         rename 's/(opennebula)-/$1_/,s/\.tar\.gz/.orig.tar.gz/' "${SOURCE}"
-        cd "${PACKAGE}"
-        cp -r "${PACKAGES_DIR}/templates/${DISTRO}/" debian
+        cd -
+        DPKGS_BUILD_DIR="${BUILD_DIR_SPKG}/${PACKAGE}"
+        cp -r "${PACKAGES_DIR}/templates/${DISTRO}/" "${DPKGS_BUILD_DIR}/debian"
     fi
 done
+
+cd "${DPKGS_BUILD_DIR}"
 
 # extra sources
 wget -q http://downloads.opennebula.org/extra/xmlrpc-c.tar.gz

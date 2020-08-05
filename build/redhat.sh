@@ -2,6 +2,8 @@
 
 set -e -o pipefail
 
+export LANG="en_US.UTF-8"
+
 # distro code name
 DISTRO=$(basename "$0")
 DISTRO=${DISTRO%.*}
@@ -29,8 +31,8 @@ PKG_VERSION=${2:-1}
 SPEC="${DISTRO}.spec"
 BUILD_DIR=$(mktemp -d)
 BUILD_DIR_SPKG=$(mktemp -d)
-PACKAGES_DIR="${PWD}"
-SOURCES_DIR="${PWD}/sources"
+PACKAGES_DIR=$(realpath "${PWD}")
+SOURCES_DIR="${PACKAGES_DIR}/sources"
 
 SOURCE=$(basename "${URL}")
 PACKAGE=${SOURCE%.tar.gz}
@@ -55,22 +57,27 @@ fi
 
 cp "templates/${DISTRO}"/* "${BUILD_DIR_SPKG}"
 
-cd "${BUILD_DIR_SPKG}"
-
 shift || :
 shift || :
 
 echo '***** Prepare sources' >&2
-for S in $URL $@; do
+for S in $URL "$@"; do
     case $S in
         http*)
-            wget -q "${S}"
+            wget -P "${BUILD_DIR_SPKG}"/ -q "${S}"
             ;;
         *)
-            cp "$(readlink --canonicalize "${S}")" .
+            LOCAL_URL=$(readlink -f "${S}" || :)
+            if [ -z "$LOCAL_URL" ] ; then
+                echo "ERROR: URL argument ('${S}') is not a valid URL or a file PATH" >&2
+                exit 1
+            fi
+            cp "${LOCAL_URL}" "${BUILD_DIR_SPKG}"/
             ;;
     esac
 done
+
+cd "${BUILD_DIR_SPKG}"
 
 # extra sources
 wget -q http://downloads.opennebula.org/extra/xmlrpc-c.tar.gz

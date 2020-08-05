@@ -98,7 +98,6 @@ BuildRequires: systemd-devel
 
 Requires: openssl
 Requires: openssh
-Requires: sqlite
 Requires: openssh-clients
 Requires: less
 
@@ -135,6 +134,7 @@ This package provides the CLI interface.
 Summary: Provides the OpenNebula servers
 Group: System
 Requires: %{name} = %{version}
+Requires: sqlite
 Requires: openssh-server
 Requires: genisoimage
 Requires: qemu-img
@@ -404,7 +404,7 @@ Configures an OpenNebula node providing kvm.
 # Requires: %{name}-common = %{version}
 #
 # %description node-xen
-# Configures an OpenNebula node providing xen.
+# Configures an OpenNebula node providing Xen.
 
 ################################################################################
 # Package provisioning tool
@@ -660,6 +660,7 @@ fi
 if [ $1 = 2 ]; then
     /sbin/service opennebula stop >/dev/null || :
     /sbin/service opennebula-scheduler stop >/dev/null || :
+    /sbin/service opennebula-hem stop >/dev/null || :
 fi
 
 %post server
@@ -685,6 +686,7 @@ systemctl daemon-reload 2>/dev/null || :
 if [ $1 = 0 ]; then
     /sbin/service opennebula stop >/dev/null || :
     /sbin/service opennebula-scheduler stop >/dev/null || :
+    /sbin/service opennebula-hem stop >/dev/null || :
 fi
 
 %postun server

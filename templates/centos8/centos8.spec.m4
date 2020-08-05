@@ -120,7 +120,6 @@ BuildRequires: scons
 
 Requires: openssl
 Requires: openssh
-Requires: sqlite
 Requires: openssh-clients
 Requires: less
 
@@ -157,6 +156,7 @@ This package provides the CLI interface.
 Summary: Provides the OpenNebula servers
 Group: System
 Requires: %{name} = %{version}
+Requires: sqlite
 Requires: openssh-server
 Requires: genisoimage
 Requires: qemu-img
@@ -741,6 +741,7 @@ fi
 if [ $1 = 2 ]; then
     /sbin/service opennebula stop >/dev/null || :
     /sbin/service opennebula-scheduler stop >/dev/null || :
+    /sbin/service opennebula-hem stop >/dev/null || :
 fi
 
 %post server
@@ -766,6 +767,7 @@ systemctl daemon-reload 2>/dev/null || :
 if [ $1 = 0 ]; then
     /sbin/service opennebula stop >/dev/null || :
     /sbin/service opennebula-scheduler stop >/dev/null || :
+    /sbin/service opennebula-hem stop >/dev/null || :
 fi
 
 %postun server
