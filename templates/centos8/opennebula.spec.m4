@@ -24,7 +24,7 @@
     %define gemfile_lock     Fedora%{?fedora}
 
     # don't mangle shebangs (e.g., fix /usr/bin/env ruby -> /usr/bin/ruby)
-    %global __brp_mangle_shebangs_exclude_from ^(\/var\/lib\/one\/remotes\|\/usr\/share\/one\/gems-dist\/gems)/
+    %global __brp_mangle_shebangs_exclude_from ^(\/var\/lib\/one\/remotes\|\/usr\/share\/one\/gems-dist\/gems\|\/usr\/lib\/one\/sunstone\/public\/bower_components\/no-vnc\/node_modules\/uri-js\/dist\/esnext)/
 
     # don't generate automatic requirements from bower components
     %global __requires_exclude_from ^\/usr\/lib\/one\/sunstone\/public\/bower_components\/.*$
