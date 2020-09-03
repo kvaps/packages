@@ -59,6 +59,8 @@ dist/usr/share/one/Gemfile                           /usr/share/one/
 dist/usr/share/one/Gemfile.lock                      /usr/share/one/
 dist/usr/share/one/onetoken.sh                       /usr/share/one/
 
+dist/etc/bash_completion.d/one                       /etc/bash_completion.d/
+
 dist/usr/bin/oneacl        /usr/bin/
 dist/usr/bin/onecluster    /usr/bin/
 dist/usr/bin/onedatastore  /usr/bin/

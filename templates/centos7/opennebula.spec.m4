@@ -131,6 +131,7 @@ Requires: openssh
 Requires: openssh-clients
 Requires: less
 Requires: gnuplot
+Requires: bash-completion
 
 Obsoletes: %{name}-addon-tools
 Requires: %{name}-common = %{version}
@@ -474,7 +475,28 @@ License: OpenNebula Software License for Non-Commercial Use
 Summary: Migration tools for OpenNebula Community Edition
 BuildArch: noarch
 Requires: %{name}-server >= 5.12, %{name}-server < 5.13
-Obsoletes: %{name}-migration
+###
+# WARNING: Yum considers this package automatically as replacement of
+# (EE) migration package and tries to replace it ALWAYS on upgrade!
+# (even though there is no community package installed before):
+#
+# Resolving Dependencies
+# --> Running transaction check
+# ---> Package opennebula-migration.noarch 0:5.12.1-2.ee.el7 will be obsoleted
+# --> Processing Dependency: opennebula-migration = 5.12.1 for package: opennebula-server-5.12.1-2.ee.el7.x86_64
+# ---> Package opennebula-migration-community.noarch 0:5.12.1-2.ee.el7 will be obsoleting
+# --> Finished Dependency Resolution
+# Error: Package: opennebula-server-5.12.1-2.ee.el7.x86_64 (@opennebula)
+#            Requires: opennebula-migration = 5.12.1
+#            Removing: opennebula-migration-5.12.1-2.ee.el7.noarch (@opennebula)
+#                opennebula-migration = 5.12.1-2.ee.el7
+#            Obsoleted By: opennebula-migration-community-5.12.1-2.ee.el7.noarch (opennebula)
+#                Not found
+#  You could try using --skip-broken to work around the problem
+#  You could try running: rpm -Va --nofiles --nodigest
+###
+#DON'T USE# Obsoletes: %{name}-migration
+Conflicts: %{name}-migration
 
 %description migration-community
 Migration tools for OpenNebula Community Edition
@@ -690,6 +712,12 @@ pushd one-ee-tools
 popd
 %endif
 
+%if %{with_enterprise}
+echo EE > %{buildroot}/%{_sharedstatedir}/one/remotes/EDITION
+%else
+echo CE > %{buildroot}/%{_sharedstatedir}/one/remotes/EDITION
+%endif
+
 %if %{with_rubygems}
 cp -a opennebula-rubygems-%{version}/gems-dist %{buildroot}/usr/share/one/
 %endif
@@ -744,6 +772,9 @@ install -p -D -m 644 share/etc/cron.d/opennebula-node %{buildroot}%{_sysconfdir}
 
 # Gemfile
 install -p -D -m 644 share/install_gems/%{gemfile_lock}/Gemfile.lock %{buildroot}/usr/share/one/Gemfile.lock
+
+# Shell completion
+install -p -D -m 644 share/shell/bash_completion          %{buildroot}%{_sysconfdir}/bash_completion.d/one
 
 # oned.aug
 %{__mkdir} -p %{buildroot}/usr/share/augeas/lenses
@@ -1136,10 +1167,9 @@ fi
 ################################################################################
 
 %post node-firecracker
-# Install
 
 # Install firecracker + jailer
-/usr/sbin/install-firecracker
+/usr/sbin/install-firecracker || exit $?
 
 # Changes ownership of chroot folder
 mkdir -p /srv/jailer/firecracker
@@ -1670,6 +1700,8 @@ sleep 10
 %{_datadir}/one/start-scripts/*
 %dir %{_datadir}/one/schemas
 %{_datadir}/one/schemas/*
+%dir %{_datadir}/one/context
+%{_datadir}/one/context/*
 
 %dir /usr/lib/one/mads
 /usr/lib/one/mads/*
@@ -1705,6 +1737,8 @@ sleep 10
 /usr/lib/one/ruby/PublicCloudDriver.rb
 %dir /usr/lib/one/sh
 /usr/lib/one/sh/*
+%dir /usr/share/one/conf
+/usr/share/one/conf/*
 
 %{_mandir}/man1/onedb.1*
 %doc LICENSE LICENSE.onsla LICENSE.onsla-nc NOTICE
@@ -1852,6 +1886,7 @@ sleep 10
 
 /usr/share/one/onetoken.sh
 
+/etc/bash_completion.d/one
 
 ################################################################################
 # Changelog

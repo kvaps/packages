@@ -167,6 +167,7 @@ Requires: openssh-clients
 Requires: less
 Requires: gnuplot
 # Recommends: gnuplot   # TODO: we are missing repository metadata to handle weak dependencies
+Requires: bash-completion
 
 Obsoletes: %{name}-addon-tools
 Requires: %{name}-common = %{version}
@@ -772,6 +773,12 @@ pushd one-ee-tools
 popd
 %endif
 
+%if %{with_enterprise}
+echo EE > %{buildroot}/%{_sharedstatedir}/one/remotes/EDITION
+%else
+echo CE > %{buildroot}/%{_sharedstatedir}/one/remotes/EDITION
+%endif
+
 %if %{with_rubygems}
 cp -a opennebula-rubygems-%{version}/gems-dist %{buildroot}/usr/share/one/
 %endif
@@ -830,6 +837,9 @@ install -p -D -m 644 share/etc/cron.d/opennebula-node %{buildroot}%{_sysconfdir}
 %if %{gemfile_lock}
 install -p -D -m 644 share/install_gems/%{gemfile_lock}/Gemfile.lock %{buildroot}/usr/share/one/Gemfile.lock
 %endif
+
+# Shell completion
+install -p -D -m 644 share/shell/bash_completion          %{buildroot}%{_sysconfdir}/bash_completion.d/one
 
 # oned.aug
 %{__mkdir} -p %{buildroot}/usr/share/augeas/lenses
@@ -1233,10 +1243,9 @@ fi
 ################################################################################
 
 %post node-firecracker
-# Install
 
 # Install firecracker + jailer
-/usr/sbin/install-firecracker
+/usr/sbin/install-firecracker || exit $?
 
 # Changes ownership of chroot folder
 mkdir -p /srv/jailer/firecracker
@@ -1781,6 +1790,8 @@ sleep 10
 %{_datadir}/one/start-scripts/*
 %dir %{_datadir}/one/schemas
 %{_datadir}/one/schemas/*
+%dir %{_datadir}/one/context
+%{_datadir}/one/context/*
 
 %dir /usr/lib/one/mads
 /usr/lib/one/mads/*
@@ -1816,6 +1827,8 @@ sleep 10
 /usr/lib/one/ruby/PublicCloudDriver.rb
 %dir /usr/lib/one/sh
 /usr/lib/one/sh/*
+%dir /usr/share/one/conf
+/usr/share/one/conf/*
 
 %{_mandir}/man1/onedb.1*
 %doc LICENSE LICENSE.onsla LICENSE.onsla-nc NOTICE
@@ -1966,6 +1979,7 @@ sleep 10
 
 /usr/share/one/onetoken.sh
 
+/etc/bash_completion.d/one
 
 ################################################################################
 # Changelog
