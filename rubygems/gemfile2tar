@@ -1,0 +1,137 @@
+#!/usr/bin/ruby
+
+# -------------------------------------------------------------------------- #
+# Copyright 2019, Erich Cernaj <456600@mail.muni.cz>                         #
+# Copyright 2002-2020, OpenNebula Project, OpenNebula Systems                #
+#                                                                            #
+# Licensed under the Apache License, Version 2.0 (the "License"); you may    #
+# not use this file except in compliance with the License. You may obtain    #
+# a copy of the License at                                                   #
+#                                                                            #
+# http://www.apache.org/licenses/LICENSE-2.0                                 #
+#                                                                            #
+# Unless required by applicable law or agreed to in writing, software        #
+# distributed under the License is distributed on an "AS IS" BASIS,          #
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   #
+# See the License for the specific language governing permissions and        #
+# limitations under the License.                                             #
+#--------------------------------------------------------------------------- #
+
+require 'bundler'
+require 'open3'
+require 'open-uri'
+require 'tmpdir'
+
+GEMFILE = ARGV[0]
+LOCK    = ARGV[1]
+OUTPUT  = ARGV[2]
+
+if File.exist?(OUTPUT)
+    STDERR.puts 'ERROR: Output archive already exists!'
+    exit 1
+end
+
+###
+
+puts 'Ruby gems downloader'
+
+Dir.mktmpdir do |tmp_dir|
+    # read lockfile
+    puts '- Parsing Gemfile(.lock)'
+
+    FileUtils.cp(GEMFILE, "#{tmp_dir}/Gemfile")
+    FileUtils.cp(LOCK, "#{tmp_dir}/Gemfile.lock")
+
+    bundle = nil
+    Dir.chdir(tmp_dir) do
+        begin
+            bundle = Bundler::LockfileParser.new(Bundler.read_file(LOCK))
+        rescue Bundler::LockfileError => e
+            STDERR.puts 'ERROR: Failed to parse lockfile'
+            STDERR.puts e.message
+            exit 1
+        end
+    end
+
+    # read gems and dependencies
+    puts '- Processing gems list'
+
+    gems = {}
+    bundle.specs.each do |gem|
+        key = [gem.name, gem.version.to_s]
+        gems[key] = []
+        gem.dependencies.each do |dependency|
+            gems[key] << dependency.name
+        end
+    end
+
+    # sort dependencies
+    sorted = {}
+    until gems.empty?
+        gems.each do |gem, dependencies|
+            # TODO: review
+            next if (sorted.empty? && !dependencies.empty?) ||
+                    !dependencies.all? do |dependency|
+                sorted.any? do |installed_gem, _version|
+                    installed_gem == dependency
+                end
+            end
+
+            sorted[gem[0]] = gem[1]
+            gems.delete(gem)
+        end
+    end
+
+    # downloads all gems and create tar archive
+    tar_top_dir = File.basename(OUTPUT).gsub(/\.tar.*/, '')
+    fetch_dir = "#{tmp_dir}/#{tar_top_dir}"
+    Dir.mkdir(fetch_dir)
+    puts "- Downloading (temporary directory #{fetch_dir})"
+
+    Dir.chdir(fetch_dir) do
+        # create manifest
+        manifest = File.new('manifest', 'w')
+
+        # fetch individual gems
+        sorted.each do |name, version|
+            file_name = "#{name}-#{version}.gem"
+
+            manifest.puts file_name
+            puts "    #{file_name}"
+
+            begin
+                # try to download directly from RubyGems
+                url = "https://rubygems.org/downloads/#{file_name}"
+                IO.copy_stream(URI.parse(url).open, file_name)
+            rescue StandardError
+                File.unlink(file_name) if File.exist?(file_name)
+
+                # fallback to gem fetch in case of error
+                fetch_cmd = ['gem', 'fetch', name, '--version', version]
+                _, stderr, status = Open3.capture3(*fetch_cmd)
+
+                unless status.success? && File.exist?(file_name)
+                    STDERR.puts 'ERROR: Failed to download'
+                    STDERR.puts stderr
+                    exit 1
+                end
+            end
+        end
+
+        manifest.close
+    end
+
+    # generate archive
+    _, e, s = Open3.capture3('tar', '-C', tmp_dir,
+                             '-cf', OUTPUT,
+                             tar_top_dir)
+
+    unless s.success?
+        STDERR.puts 'ERROR: Failed to create archive'
+        STDERR.puts e
+
+        File.unlink(OUTPUT) if File.exist?(OUTPUT)
+
+        exit 1
+    end
+end

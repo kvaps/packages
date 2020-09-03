@@ -1,1 +1,0 @@
-../../sources/build_opennebula.sh

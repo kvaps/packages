@@ -15,9 +15,10 @@ ssh_key_configure() {
     fi
     if ! [ -f "$ONEHOME/.ssh/id_rsa" ]; then
         su $ONE_USER -c "ssh-keygen -N '' -t rsa -f $ONEHOME/.ssh/id_rsa"
-    fi
-    if ! [ -f "$ONEHOME/.ssh/authorized_keys" ]; then
-        cp -p "$ONEHOME/.ssh/id_rsa.pub" "$ONEHOME/.ssh/authorized_keys"
+        if ! [ -f "$ONEHOME/.ssh/authorized_keys" ]; then
+            cp -p "$ONEHOME/.ssh/id_rsa.pub" "$ONEHOME/.ssh/authorized_keys"
+            chmod 600 "$ONEHOME/.ssh/authorized_keys"
+        fi
     fi
 }
 
@@ -52,6 +53,7 @@ if [ "$1" = "configure" ]; then
         /etc/one/oned.conf \
         /etc/one/onehem-server.conf \
         /etc/one/sched.conf \
+        /etc/one/monitord.conf \
         /etc/one/vmm_exec/ \
         /etc/one/az_driver.conf \
         /etc/one/az_driver.default \
@@ -72,10 +74,7 @@ if [ "$1" = "configure" ]; then
     for F in /var/lib/one \
         /var/lib/one/vms \
         /var/lib/one/datastores \
-        /var/lib/one/remotes \
-        /var/lock/one \
-        /var/log/one \
-        /var/run/one;
+        /var/lib/one/remotes;
     do
         if [ -d "${F}" ]; then
             chmod 0750 "${F}"
@@ -88,7 +87,5 @@ if [ "$1" = "configure" ]; then
         chown "${ONE_USER}:${ONE_GROUP}" "${F}"
     done
 fi
-
-systemd-tmpfiles --create /usr/lib/tmpfiles.d/opennebula.conf
 
 #DEBHELPER#

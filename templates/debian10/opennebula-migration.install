@@ -1,0 +1,2 @@
+dist/usr/lib/one/ruby/onedb/local/*.rb                             /usr/lib/one/ruby/onedb/local/
+dist/usr/lib/one/ruby/onedb/shared/*.rb                            /usr/lib/one/ruby/onedb/shared/

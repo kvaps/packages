@@ -1,3 +1,0 @@
-dist/etc/one/onegate-server.conf /etc/one/
-dist/usr/bin/onegate-server /usr/bin/
-dist/usr/lib/one/onegate/* /usr/lib/one/onegate/

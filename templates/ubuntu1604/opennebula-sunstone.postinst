@@ -33,10 +33,7 @@ if [ "$1" = "configure" ]; then
     done
 
     # Fix permissions oneadmin:oneadmin (0640/0750)
-    for F in /var/lock/one \
-        /var/log/one \
-        /var/run/one \
-        /var/lib/one/sunstone;
+    for F in /var/lib/one/sunstone;
     do
         if [ -d "${F}" ]; then
             chmod 0750 "${F}"
@@ -51,5 +48,3 @@ if [ "$1" = "configure" ]; then
 fi
 
 dpkg-maintscript-helper mv_conffile /etc/one/sunstone-views/vcenter.yaml /etc/one/sunstone-views/admin_vcenter.yaml 4.10.2-1 -- "$@"
-
-systemd-tmpfiles --create /usr/lib/tmpfiles.d/opennebula-sunstone.conf

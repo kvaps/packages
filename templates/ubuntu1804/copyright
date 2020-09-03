@@ -1,10 +1,10 @@
 Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: OpenNebula
-Upstream-Contact: OpenNebula Project Leads (OpenNebula.org)
+Upstream-Contact: OpenNebula Systems (OpenNebula.io)
 Source: http://dev.opennebula.org/projects/opennebula/files
 
 Files: *
-Copyright: 2002-2012, OpenNebula Project Leads (OpenNebula.org)
+Copyright: 2002-2020, OpenNebula Project, OpenNebula Systems
 License: Apache-2.0
 
 Files: src/host/host_rank.cc
@@ -64,7 +64,7 @@ License: GPL-2+ or MIT
 Files: debian/*
 Copyright: 2008, Soren Hansen <soren@ubuntu.com>
  2010, Damien Raude-Morvan <drazzib@debian.org>
- 2011, Jaime Melis <jmelis@opennebula.org>
+ 2011-2020, OpenNebula Project, OpenNebula Systems
 License: Apache-2.0
 
 License: MIT
@@ -179,16 +179,21 @@ License: GPL-2+ with Bison exception
    `/usr/share/common-licenses/GPL-2'.
 
 License: Apache-2.0
-   OpenNebula is distributed and licensed for use under the terms of
-   the  Apache License, Version 2.0. Copyright 2002-2008, Distributed
-   Systems Architecture Group, Universidad Complutense de Madrid
-   (dsa-research.org).
-   .
-   On Debian systems, the full text of the Apache License
-   Version 2.0 can be found in the file
-   `/usr/share/common-licenses/Apache-2.0'.
+   OpenNebula Community Edition is distributed and licensed for
+   use under the Apache License, Version 2.0 (the "License").
+   Full text can be found in the file `/usr/share/doc/one/LICENSE.gz`.
+   Copyright 2002-2020, OpenNebula Project, OpenNebula Systems.
 
-License: OpenNebula Systems Commercial Open-Source Software License
-   The full text can be found on
-   `https://raw.githubusercontent.com/OpenNebula/one/master/LICENSE.addons`.
+License: OpenNebula Software License
+   OpenNebula Enterprise Edition and OneScape are distributed
+   and licensed under OpenNebula Software License.
+   Full text can be found in the file `/usr/share/doc/one/LICENSE.onsla.gz` or
+   `https://github.com/OpenNebula/one/blob/master/LICENSE.onsla`.
+   Copyright 2002-2020, OpenNebula Project, OpenNebula Systems.
 
+License: OpenNebula Software License for Non-Commercial Use
+   OpenNebula migration package for Community Edition is distributed
+   under OpenNebula Software License for Non-Commercial Use.
+   Full text can be found in the file `/usr/share/doc/one/LICENSE.onsla-nc.gz`
+   or `https://github.com/OpenNebula/one/blob/master/LICENSE.onsla-nc`.
+   Copyright 2002-2020, OpenNebula Project, OpenNebula Systems.

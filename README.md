@@ -23,13 +23,13 @@ build `rpm` and `deb` packages. `rpm` packages can be built on RHEL or CentOS,
 Install deps. to build `rpm` packages on CentOS 7:
 
 ```
-yum install -y wget m4 mock
+yum install -y wget m4 rubygem-bundler mock
 ```
 
 Install deps. to build `deb` packages on Debian or Ubuntu:
 
 ```
-apt-get install -y wget m4 rename pbuilder ubuntu-dev-tools
+apt-get install -y wget m4 ruby-bundler rename pbuilder ubuntu-dev-tools
 ```
 
 ## Source Archive

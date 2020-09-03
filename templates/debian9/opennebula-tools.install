@@ -2,6 +2,8 @@ dist/etc/one/cli/oneacct.yaml       /etc/one/cli/
 dist/etc/one/cli/oneacl.yaml        /etc/one/cli/
 dist/etc/one/cli/onecluster.yaml    /etc/one/cli/
 dist/etc/one/cli/onedatastore.yaml  /etc/one/cli/
+dist/etc/one/cli/oneflow.yaml       /etc/one/cli/
+dist/etc/one/cli/oneflowtemplate.yaml /etc/one/cli/
 dist/etc/one/cli/onegroup.yaml      /etc/one/cli/
 dist/etc/one/cli/onehook.yaml       /etc/one/cli/
 dist/etc/one/cli/onehost.yaml       /etc/one/cli/
@@ -28,6 +30,8 @@ dist/usr/lib/one/ruby/cli/one_helper/oneacct_helper.rb       /usr/lib/one/ruby/c
 dist/usr/lib/one/ruby/cli/one_helper/oneacl_helper.rb        /usr/lib/one/ruby/cli/one_helper/
 dist/usr/lib/one/ruby/cli/one_helper/onecluster_helper.rb    /usr/lib/one/ruby/cli/one_helper/
 dist/usr/lib/one/ruby/cli/one_helper/onedatastore_helper.rb  /usr/lib/one/ruby/cli/one_helper/
+dist/usr/lib/one/ruby/cli/one_helper/oneflow_helper.rb       /usr/lib/one/ruby/cli/one_helper/
+dist/usr/lib/one/ruby/cli/one_helper/oneflowtemplate_helper.rb /usr/lib/one/ruby/cli/one_helper/
 dist/usr/lib/one/ruby/cli/one_helper/onegroup_helper.rb      /usr/lib/one/ruby/cli/one_helper/
 dist/usr/lib/one/ruby/cli/one_helper/onehook_helper.rb       /usr/lib/one/ruby/cli/one_helper/
 dist/usr/lib/one/ruby/cli/one_helper/onehost_helper.rb       /usr/lib/one/ruby/cli/one_helper/

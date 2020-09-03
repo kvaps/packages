@@ -1,0 +1,99 @@
+#!/bin/sh
+
+ONEHOME=/var/lib/one
+ONE_GROUP=oneadmin
+ONE_USER=oneadmin
+ONE_UID=9869
+ONE_GID=9869
+
+ONESCAPE_ETC='/etc/onescape'
+ONESCAPE_CFG="${ONESCAPE_ETC}/config.yaml"
+ONESCAPE_BAK="${ONEHOME}/backups/config"
+
+### Backup configuration ###
+
+# better fail silently than break installation
+set +e
+
+# create OneScape directory
+if [ ! -d "${ONESCAPE_ETC}" ]; then
+    mkdir -p "${ONESCAPE_ETC}"
+fi
+
+# create backup directory
+if [ ! -d "${ONESCAPE_BAK}" ]; then
+    mkdir -p "${ONESCAPE_BAK}"
+    chmod 700 "${ONESCAPE_BAK}"
+    chown 'root:root' "${ONESCAPE_BAK}"
+
+    # FIX: parent directory, just safety check if we would change onescape_bak
+    if [ -d "${ONEHOME}/backups" ]; then
+        chmod 700 "${ONEHOME}/backups"
+        chown "${ONE_USER}:${ONE_GROUP}" "${ONEHOME}/backups"
+    fi
+fi
+
+# detect previous installed version
+if [ "$1" = 'upgrade' ]; then
+    PREV_VERSION=${2%%-*}
+elif [ "$1" = 'install' ]; then
+    PREV_VERSION=$(dpkg-query --show --showformat='${Version}' opennebula-common 2>/dev/null)
+    PREV_VERSION=${PREV_VERSION%%-*}
+fi
+
+# upgrade
+if [ -n "${PREV_VERSION}" ]; then
+    # backup configuration
+    BACKUP_DIR="${ONESCAPE_BAK}/$(date +'%Y-%m-%d_%H:%M:%S')-v${PREV_VERSION:-UNKNOWN}"
+    mkdir "${BACKUP_DIR}"
+    chmod 700 "${BACKUP_DIR}"
+
+    for DIR in '/etc/one' '/var/lib/one/remotes'; do
+        if [ -d "${DIR}" ]; then
+            # We try to mimic filesystem structure in backups, e.g.
+            # /etc/one/oned.conf -> $BACKUP_DIR/etc/one/oned.conf
+            DIR_PARENT="$(dirname "${DIR}")"
+            mkdir -p "${BACKUP_DIR}/${DIR_PARENT}"
+            cp -a "${DIR}" "${BACKUP_DIR}/${DIR_PARENT}"
+        fi
+    done
+
+    if [ -f "${ONESCAPE_CFG}" ]; then
+       # if it already contains backup, we put obsolete
+       # flag and don't modify backup again.
+       if grep -qF 'backup:' "${ONESCAPE_CFG}"; then
+           if ! grep -qF 'outdated: true' "${ONESCAPE_CFG}"; then
+               printf "\noutdated: true\n" >> "${ONESCAPE_CFG}"
+           fi
+       else
+           printf "\nbackup: '%s'\n" "${BACKUP_DIR}" >> "${ONESCAPE_CFG}"
+       fi
+    else
+        # create new configuration
+        cat - <<EOF >"${ONESCAPE_CFG}"
+---
+backup: '${BACKUP_DIR}'
+EOF
+
+        # and, put version inside if known
+        if [ -n "${PREV_VERSION}" ]; then
+            printf "\nversion: '%s'\n" "${PREV_VERSION}" >> "${ONESCAPE_CFG}"
+        fi
+    fi
+
+# install
+elif [ "$1" = 'install' ]; then
+    VERSION=$(dpkg-query --show --showformat='${Version}' opennebula-common-onescape 2>/dev/null)
+    VERSION=${VERSION%%-*}
+
+    if [ -n "${VERSION}" ]; then
+        cat - <<EOF >"${ONESCAPE_CFG}"
+---
+version: '${VERSION}'
+EOF
+    fi
+fi
+
+# pass silently
+set -e
+/bin/true

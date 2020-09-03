@@ -27,10 +27,6 @@ ssh_key_configure() {
 }
 
 if [ "$1" = "configure" ]; then
-    chown -R $ONE_USER:$ONE_GROUP   /var/lib/one/remotes/pm/
-    chown -R $ONE_USER:$ONE_GROUP   /var/lib/one/remotes/im/packet.d/
-    chown -R $ONE_USER:$ONE_GROUP   /var/lib/one/remotes/vmm/packet/
-
     ssh_key_configure
 fi
 

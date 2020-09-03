@@ -35,6 +35,7 @@ end
 def setup_fpm(build_dir)
   FileUtils.mkdir_p(build_dir) unless File.exist?(build_dir)
   ENV['GEM_PATH'] = "#{build_dir}/fpm:#{build_dir}/gems"
+  ENV['GEM_PATH'] = ENV['GEM_PATH'] + ':/usr/share/gems' # Fedora 32
   ENV['GEM_HOME'] = "#{build_dir}/fpm"
   _, _, status = Open3.capture3('gem', 'list',
                                 '-i', 'fpm')
@@ -42,13 +43,57 @@ def setup_fpm(build_dir)
     STDERR.puts 'Installing fpm'
     fpm_install = 'gem',
                   'install',
-                  '--no-ri',
-                  '--no-rdoc',
+                  '--no-document',
                   '--install-dir', "#{build_dir}/fpm",
                   '--bindir', "#{build_dir}/fpm/bin",
-                  'fpm'
+                  'fpm', '--version', '1.11.0'
     run_command(fpm_install)
+
+    STDERR.puts 'Patching fpm'
+    Dir.chdir(Dir["#{build_dir}/fpm/gems/fpm*/"].first) do
+      # gem pessimistic version oprator
+      STDERR.puts '- deb gem pessimistic version patch'
+      run_command(['patch', '-p1'], <<'EOT')
+--- a/lib/fpm/package/deb.rb
++++ b/lib/fpm/package/deb.rb
+@@ -715,8 +715,13 @@ class FPM::Package::Deb < FPM::Package
+       name, version = dep.gsub(/[()~>]/, "").split(/ +/)[0..1]
+       nextversion = version.split(".").collect { |v| v.to_i }
+       l = nextversion.length
+-      nextversion[l-2] += 1
+-      nextversion[l-1] = 0
++      if l > 1
++        nextversion[l-2] += 1
++        nextversion[l-1] = 0
++      else
++        # Single component versions ~> 1
++        nextversion[l-1] += 1
++      end
+       nextversion = nextversion.join(".")
+       return ["#{name} (>= #{version})", "#{name} (<< #{nextversion})"]
+     elsif (m = dep.match(/(\S+)\s+\(!= (.+)\)/))
+EOT
+
+      # RubyGems 3.x arguments
+      unless ::Gem::VERSION =~ /^[012]\./
+        STDERR.puts '- RubyGems 3.x use --no-document'
+        run_command(['patch', '-p1'], <<'EOT')
+--- a/lib/fpm/package/gem.rb
++++ b/lib/fpm/package/gem.rb
+@@ -198,7 +198,7 @@ class FPM::Package::Gem < FPM::Package
+
+     ::FileUtils.mkdir_p(installdir)
+     # TODO(sissel): Allow setting gem tool path
+-    args = [attributes[:gem_gem], "install", "--quiet", "--no-ri", "--no-rdoc",
++    args = [attributes[:gem_gem], "install", "--quiet", "--no-document",
+        "--no-user-install", "--install-dir", installdir]
+
+     if !attributes[:gem_embed_dependencies?]
+EOT
+      end
+    end
   end
+
   ENV['GEM_HOME'] = "#{build_dir}/gems"
   "#{build_dir}/fpm/bin/fpm"
 end
@@ -138,10 +183,11 @@ end
 
 # Run command with Open3
 # Return exit status, stdout
-def run_command(command)
-  stdout, stderr, status = Open3.capture3(*command)
+def run_command(command, stdin=nil)
+  stdout, stderr, status = Open3.capture3(*command, :stdin_data => stdin)
   unless status.success?
     STDERR.puts("Error executing command:\n#{command.join(' ')}")
+    STDERR.puts(stdout)
     STDERR.puts(stderr)
     return false, nil
   end
@@ -171,8 +217,7 @@ def pack_gem(gem, build_dir, fpm_path)
                         'install',
                         '--install-dir', "#{build_dir}/gems",
                         '--ignore-dependencies',
-                        '--no-ri',
-                        '--no-rdoc',
+                        '--no-document',
                         '-f',
                         '-v', gem[:version],
                         gem[:name]

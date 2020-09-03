@@ -1,43 +1,6 @@
 ### See https://github.com/OpenNebula/packages/issues/68
 #dist/var/lib/one/datastores/*                /var/lib/one/datastores
-dist/var/lib/one/remotes/etc/*                /var/lib/one/remotes/etc/
-dist/var/lib/one/remotes/auth/*               /var/lib/one/remotes/auth/
-dist/var/lib/one/remotes/datastore/*          /var/lib/one/remotes/datastore/
-dist/var/lib/one/remotes/hooks/*              /var/lib/one/remotes/hooks/
-dist/var/lib/one/remotes/im/az.d/*            /var/lib/one/remotes/im/az.d/
-dist/var/lib/one/remotes/im/ec2.d/*           /var/lib/one/remotes/im/ec2.d/
-dist/var/lib/one/remotes/im/kvm.d/*           /var/lib/one/remotes/im/kvm.d/
-dist/var/lib/one/remotes/im/kvm-probes.d/*    /var/lib/one/remotes/im/kvm-probes.d/
-dist/var/lib/one/remotes/im/lxd.d/*           /var/lib/one/remotes/im/lxd.d/
-dist/var/lib/one/remotes/im/lxd-probes.d/*    /var/lib/one/remotes/im/lxd-probes.d/
-dist/var/lib/one/remotes/im/one.d/*           /var/lib/one/remotes/im/one.d/
-dist/var/lib/one/remotes/im/packet.d/*        /var/lib/one/remotes/im/packet.d/
-dist/var/lib/one/remotes/im/vcenter.d/*       /var/lib/one/remotes/im/vcenter.d/
-dist/var/lib/one/remotes/im/run_probes        /var/lib/one/remotes/im/
-dist/var/lib/one/remotes/im/stop_probes       /var/lib/one/remotes/im/
-dist/var/lib/one/remotes/ipam/*               /var/lib/one/remotes/ipam/
-dist/var/lib/one/remotes/market/http/*        /var/lib/one/remotes/market/http/
-dist/var/lib/one/remotes/market/linuxcontainers/*  /var/lib/one/remotes/market/linuxcontainers/
-dist/var/lib/one/remotes/market/turnkeylinux/*  /var/lib/one/remotes/market/turnkeylinux/
-dist/var/lib/one/remotes/market/one/*         /var/lib/one/remotes/market/one/
-dist/var/lib/one/remotes/market/s3/*          /var/lib/one/remotes/market/s3/
-dist/var/lib/one/remotes/pm/ec2/*             /var/lib/one/remotes/pm/ec2/
-dist/var/lib/one/remotes/pm/dummy/*           /var/lib/one/remotes/pm/dummy/
-dist/var/lib/one/remotes/pm/packet/*          /var/lib/one/remotes/pm/packet/
-dist/var/lib/one/remotes/tm/*                 /var/lib/one/remotes/tm/
-dist/var/lib/one/remotes/vmm/az/*             /var/lib/one/remotes/vmm/az/
-dist/var/lib/one/remotes/vmm/ec2/*            /var/lib/one/remotes/vmm/ec2/
-dist/var/lib/one/remotes/vmm/kvm/*            /var/lib/one/remotes/vmm/kvm/
-dist/var/lib/one/remotes/vmm/lxd/*            /var/lib/one/remotes/vmm/lxd/
-dist/var/lib/one/remotes/vmm/lib/*            /var/lib/one/remotes/vmm/lib/
-dist/var/lib/one/remotes/vmm/one/*            /var/lib/one/remotes/vmm/one/
-dist/var/lib/one/remotes/vmm/packet/*         /var/lib/one/remotes/vmm/packet/
-dist/var/lib/one/remotes/vmm/vcenter/*        /var/lib/one/remotes/vmm/vcenter/
-dist/var/lib/one/remotes/vnm/*                /var/lib/one/remotes/vnm/
-dist/var/lib/one/remotes/create_container_image.sh  /var/lib/one/remotes/
-dist/var/lib/one/remotes/scripts_common.rb    /var/lib/one/remotes/
-dist/var/lib/one/remotes/scripts_common.sh    /var/lib/one/remotes/
-dist/var/lib/one/remotes/VERSION              /var/lib/one/remotes/
+dist/var/lib/one/remotes/*                    /var/lib/one/remotes/
 dist/var/lib/one/vms             /var/lib/one/
 
 dist/etc/one/defaultrc           /etc/one/
@@ -45,6 +8,7 @@ dist/etc/one/tmrc                /etc/one/
 dist/etc/one/oned.conf           /etc/one/
 dist/etc/one/onehem-server.conf  /etc/one/
 dist/etc/one/sched.conf          /etc/one/
+dist/etc/one/monitord.conf       /etc/one/
 dist/etc/one/ec2_driver.conf     /etc/one/
 dist/etc/one/ec2_driver.default  /etc/one/
 dist/etc/one/az_*                /etc/one/
@@ -74,16 +38,21 @@ dist/usr/lib/one/ruby/packet_driver.rb      /usr/lib/one/ruby/
 dist/usr/lib/one/ruby/vcenter_driver.rb     /usr/lib/one/ruby/
 dist/usr/lib/one/ruby/vcenter_driver/*      /usr/lib/one/ruby/vcenter_driver/
 
-dist/usr/lib/one/ruby/onedb/*              /usr/lib/one/ruby/onedb/
+dist/usr/lib/one/ruby/onedb/fsck/*         /usr/lib/one/ruby/onedb/fsck/
+dist/usr/lib/one/ruby/onedb/patches/*      /usr/lib/one/ruby/onedb/patches/
+dist/usr/lib/one/ruby/onedb/*.rb           /usr/lib/one/ruby/onedb/
 
 dist/usr/lib/one/ruby/one_vnm.rb                              /usr/lib/one/ruby/
 dist/usr/lib/one/ruby/DriverExecHelper.rb                     /usr/lib/one/ruby/
 dist/usr/lib/one/ruby/ActionManager.rb                        /usr/lib/one/ruby/
 dist/usr/lib/one/ruby/VirtualMachineDriver.rb                 /usr/lib/one/ruby/
+dist/usr/lib/one/ruby/PublicCloudDriver.rb                    /usr/lib/one/ruby/
 
 dist/usr/share/one/examples/*       /usr/share/one/examples/
 dist/usr/share/one/esx-fw-vnc/*     /usr/share/one/esx-fw-vnc/
 dist/usr/share/one/follower_cleanup /usr/share/one/
+dist/usr/share/one/start-scripts/*  /usr/share/one/start-scripts/
+dist/usr/share/one/schemas/*        /usr/share/one/schemas/
 
 dist/usr/bin/oned          /usr/bin/
 dist/usr/bin/mm_sched      /usr/bin/

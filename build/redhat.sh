@@ -10,12 +10,20 @@ DISTRO=${DISTRO%.*}
 
 if [ "${DISTRO}" = 'centos7' ]; then
     MOCK_CFG='epel-7-x86_64'
+    MOCK_PARAMS=''
     DIST_TAG='el7'
     GEMFILE_LOCK='CentOS7'
 elif [ "${DISTRO}" = 'centos8' ]; then
     MOCK_CFG='epel-8-x86_64'
+    MOCK_PARAMS=''
     DIST_TAG='el8'
     GEMFILE_LOCK='CentOS8'
+elif [ "${DISTRO}" = 'fedora32' ]; then
+    TEMPLATES='centos8'
+    MOCK_CFG='fedora-32-x86_64'
+    MOCK_PARAMS='--use-bootstrap-image'
+    DIST_TAG='fc32'
+    GEMFILE_LOCK='Fedora32'
 else
     echo "ERROR: Invalid target '${DISTRO}'" >&2
     exit 1
@@ -28,7 +36,8 @@ cd "$(dirname "$0")"
 URL="$1"
 PKG_VERSION=${2:-1}
 
-SPEC="${DISTRO}.spec"
+SPEC='opennebula.spec'
+TEMPLATES=${TEMPLATES:-${DISTRO}}
 BUILD_DIR=$(mktemp -d)
 BUILD_DIR_SPKG=$(mktemp -d)
 PACKAGES_DIR=$(realpath "${PWD}")
@@ -39,7 +48,7 @@ PACKAGE=${SOURCE%.tar.gz}
 
 NAME=$(echo "${PACKAGE}" | cut -d'-' -f1) # opennebula
 VERSION=$(echo "${PACKAGE}" |cut -d'-' -f2) # 1.9.90
-CONTACT=${CONTACT:-Unsupported Community Build}
+CONTACT=${CONTACT:-Unofficial Unsupported Build}
 BASE_NAME="${NAME}-${VERSION}-${PKG_VERSION}"
 GEMS_RELEASE="${VERSION}_${PKG_VERSION}.${DIST_TAG}"
 GIT_VERSION=${GIT_VERSION:-not known}
@@ -55,7 +64,7 @@ fi
 # Get all sources
 ################################################################################
 
-cp "templates/${DISTRO}"/* "${BUILD_DIR_SPKG}"
+cp "templates/${TEMPLATES}"/* "${BUILD_DIR_SPKG}"
 
 shift || :
 shift || :
@@ -100,43 +109,12 @@ fi
 
 RUBYGEMS_REQ=''
 if [[ "${BUILD_COMPONENTS}" =~ rubygems ]]; then
-    echo '***** Building Ruby gems' >&2
-    MOCK_DIR_GEMS=$(mktemp -d)
+    echo '***** Downloading Ruby gems' >&2
 
-    # build Ruby gems
-    mock -r "${MOCK_CFG}" --bootstrap-chroot --init
-    mock -r "${MOCK_CFG}" --bootstrap-chroot --install yum
-
-    _MOCK_BIND_MOUNTS="[ \
-('${PACKAGES_DIR}',   '/data/packages'), \
-('${BUILD_DIR_SPKG}', '/data/source'), \
-('${MOCK_DIR_GEMS}',  '/data/build'), \
-]"
-
-    mock -r "${MOCK_CFG}" \
-        --bootstrap-chroot \
-        --enable-network \
-        --enable-plugin=bind_mount \
-        --plugin-option=bind_mount:dirs="${_MOCK_BIND_MOUNTS}" \
-        --chroot \
-        '/data/packages/rubygems/build.sh' \
-            "/data/source/${SOURCE}" \
-            "/data/build" \
-            "${GEMFILE_LOCK}" \
-            "${GEMS_RELEASE}" \
-            "${CONTACT}"
-
-    # generate spec requirements for all Ruby gem packages
-    while IFS= read -r LINE; do
-        _NAME=$(echo "${LINE}" | cut -d' ' -f1)
-        _VERS=$(echo "${LINE}" | cut -d' ' -f2)
-        _REL=$(echo "${LINE}" | cut -d' ' -f3)
-
-        RUBYGEMS_REQ="${RUBYGEMS_REQ}Requires: ${_NAME} = ${_VERS}-${_REL}"$'\n'
-    done < <(rpm -qp "${MOCK_DIR_GEMS}"/opennebula-rubygem-*.rpm --queryformat '%{NAME} %{VERSION} %{RELEASE}\n')
-
-    cp "${MOCK_DIR_GEMS}"/opennebula-rubygem-*.rpm "${BUILD_DIR}"
-    rm -rf "${MOCK_DIR_GEMS}"
+    bash -x "${PACKAGES_DIR}/rubygems/download.sh" \
+        "${BUILD_DIR_SPKG}/${SOURCE}" \
+        "${GEMFILE_LOCK}" \
+        "${BUILD_DIR_SPKG}/opennebula-rubygems-${VERSION}.tar"
 fi
 
 ################################################################################
@@ -151,7 +129,7 @@ m4 -D_VERSION_="${VERSION}" \
     -D_DATE_="${DATE}" \
     -D_RUBYGEMS_REQ_="${RUBYGEMS_REQ}" \
     ${_BUILD_COMPONENTS_UC:+ -D_WITH_${_BUILD_COMPONENTS_UC//[[:space:]]/_ -D_WITH_}_} \
-    "${DISTRO}.spec.m4" >"${SPEC}"
+    "${SPEC}.m4" >"${SPEC}"
 
 ################################################################################
 # Build the package
@@ -160,12 +138,13 @@ m4 -D_VERSION_="${VERSION}" \
 _BUILD_COMPONENTS_LC=${BUILD_COMPONENTS,,}
 _WITH_COMPONENTS=${_BUILD_COMPONENTS_LC:+ --with ${_BUILD_COMPONENTS_LC//[[:space:]]/ --with }}
 
-mock -r "${MOCK_CFG}" --bootstrap-chroot --init
+mock -r "${MOCK_CFG}" ${MOCK_PARAMS} --bootstrap-chroot --init
 
 # build source package
 echo '***** Building source package' >&2
 MOCK_DIR_SPKG=$(mktemp -d)
 mock -r "${MOCK_CFG}" -v \
+    ${MOCK_PARAMS} \
     --bootstrap-chroot \
     --buildsrpm \
     --resultdir="${MOCK_DIR_SPKG}" \
@@ -190,6 +169,7 @@ rm -rf "${MOCK_DIR_SPKG}"
 echo '***** Building binary package' >&2
 MOCK_DIR_PKG=$(mktemp -d)
 mock -r "${MOCK_CFG}" -v \
+    ${MOCK_PARAMS} \
     --bootstrap-chroot \
     --rebuild "${BUILD_DIR}/src/${SRPM}" \
     --resultdir="${MOCK_DIR_PKG}" \

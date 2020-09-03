@@ -1,5 +1,0 @@
-dist/usr/bin/oneprovision                                   /usr/bin/
-dist/etc/one/cli/oneprovision.yaml                          /etc/one/cli/
-dist/usr/lib/one/ruby/cli/one_helper/oneprovision_helper.rb /usr/lib/one/ruby/cli/one_helper/
-dist/usr/share/one/oneprovision/*                           /usr/share/one/oneprovision/
-dist/usr/lib/one/oneprovision/*                             /usr/lib/one/oneprovision

@@ -1,3 +1,0 @@
-dist/etc/sudoers.d/one-extension-serversync                /etc/sudoers.d
-dist/usr/lib/one/ruby/cli/addons/onezone/serversync.rb     /usr/lib/one/ruby/cli/addons/onezone/
-dist/usr/lib/one/ruby/cli/addons/onevcenter/cleartags.rb   /usr/lib/one/ruby/cli/addons/onevcenter/

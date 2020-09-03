@@ -9,5 +9,4 @@ dist/usr/lib/one/ruby/opennebula/*           /usr/lib/one/ruby/opennebula/
 dist/usr/lib/one/sunstone/models/OpenNebulaJSON.rb      /usr/lib/one/ruby/
 dist/usr/lib/one/sunstone/models/OpenNebulaJSON/*       /usr/lib/one/ruby/OpenNebulaJSON/
 
-dist/usr/lib/one/ruby/vendors/rbvmomi/      /usr/lib/one/ruby/vendors/
 dist/usr/lib/one/ruby/vendors/packethost/    /usr/lib/one/ruby/vendors/

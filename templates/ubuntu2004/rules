@@ -1,0 +1,259 @@
+#!/usr/bin/make -f
+
+export DH_VERBOSE=1
+
+# Handle group assignment: libvirt (Debian) and libvirtd (Ubuntu)
+ifeq ($(shell dpkg-vendor --derives-from Ubuntu && echo yes),yes)
+	LIB_VIRT_GROUP = libvirt
+else
+	LIB_VIRT_GROUP = libvirt
+endif
+
+# distribution specific content
+DIR_SUDOERS  = 'debian'
+DIR_SERVICES = 'systemd'
+DIR_TMPFILES = ''
+GEMFILE_LOCK = 'Ubuntu2004'
+
+# https://wiki.debian.org/HardeningWalkthrough#Selecting_security_hardening_options
+export DEB_BUILD_MAINT_OPTIONS=hardening=+all
+
+dpkg_buildflags = DEB_LDFLAGS_MAINT_APPEND="-Wl,--as-needed" dpkg-buildflags
+
+# injecting CPPFLAGS to CFLAGS and CXXFLAGS
+export CPPFLAGS:=$(shell $(dpkg_buildflags) --get CPPFLAGS)
+export CFLAGS:=$(shell $(dpkg_buildflags) --get CFLAGS) $(CPPFLAGS)
+export CXXFLAGS:=$(shell $(dpkg_buildflags) --get CXXFLAGS) $(CPPFLAGS)
+export LDFLAGS:=$(shell $(dpkg_buildflags) --get LDFLAGS)
+
+%:
+	dh $@ --with javahelper,bash-completion,systemd
+
+override_dh_auto_build:
+	#scons  mysql=yes new_xmlrpc=yes
+	tar xzvf build_opennebula.tar.gz
+
+	# we take only prebuilt Java OCA
+	tar xzvf java-oca-*.tar.gz
+	mv java-oca-*/jar/ src/oca/java/
+
+ifneq (,$(filter docker-machine-opennebula, $(shell dh_listpackages)))
+	tar xzvf opennebula-docker-machine-*.tar.gz
+endif
+ifneq (,$(filter opennebula-addon-tools, $(shell dh_listpackages)))
+	tar xzvf opennebula-addon-tools-*.tar.gz
+endif
+ifneq (,$(filter opennebula-addon-markets, $(shell dh_listpackages)))
+	tar xzvf opennebula-addon-markets-*.tar.gz
+endif
+ifneq (,$(filter opennebula-migration, $(shell dh_listpackages)))
+	tar xzvf opennebula-ee-tools-*.tar.gz
+endif
+ifneq (,$(filter opennebula-rubygems, $(shell dh_listpackages)))
+	tar xvf opennebula-rubygems-*.tar
+
+	cd opennebula-rubygems-* && \
+		CPATH=/usr/include/libxml2 \
+		GEM_PATH=$$PWD/gems-dist/ GEM_HOME=$$PWD/gems-dist/ \
+			gem install \
+				--local \
+				--ignore-dependencies \
+				--no-document \
+				--conservative \
+				--install-dir $$PWD/gems-dist \
+				--bindir $$PWD/gems-dist/bin/ \
+				$$(cat manifest)
+
+	# drop build artifacts
+	rm -rf opennebula-rubygems-*/gems-dist/cache \
+		opennebula-rubygems-*/gems-dist/gems/*/ext
+endif
+
+	#XMLRPC_DIR="debian/" debian/build_opennebula.sh
+ifneq (,$(filter opennebula-migration, $(shell dh_listpackages)))
+	./build_opennebula.sh systemd=yes gitversion="$(shell cat debian/gitversion)" enterprise=yes
+else
+	./build_opennebula.sh systemd=yes gitversion="$(shell cat debian/gitversion)"
+endif
+
+ifneq (,$(filter opennebula-migration-community, $(shell dh_listpackages)))
+	(cd one-ee-tools/src/onedb/ && \
+	./build.rb)
+endif
+
+override_dh_auto_install:
+	rm -rf src/sunstone/public/node_modules/ || :
+	DESTDIR=dist ./install.sh
+ifneq (,$(filter docker-machine-opennebula, $(shell dh_listpackages)))
+	DESTDIR=dist ./install.sh -e
+endif
+ifneq (,$(filter opennebula-addon-tools, $(shell dh_listpackages)))
+	(cd addon-tools && \
+	DESTDIR=../dist ./install.sh)
+endif
+ifneq (,$(filter opennebula-addon-markets, $(shell dh_listpackages)))
+	(cd addon-markets && \
+	DESTDIR=../dist ./install.sh)
+endif
+ifneq (,$(filter opennebula-migration, $(shell dh_listpackages)))
+	(cd one-ee-tools && \
+	DESTDIR=../dist ./install-ee-tools.sh)
+endif
+ifneq (,$(filter opennebula-migration-community, $(shell dh_listpackages)))
+	dh_install -p opennebula-migration-community one-ee-tools/src/onedb/local/5.10.0_to_5.12.0.rbm \
+		/usr/lib/one/ruby/onedb/local/
+	dh_install -p opennebula-migration-community one-ee-tools/src/onedb/shared/5.10.0_to_5.12.0.rbm \
+		/usr/lib/one/ruby/onedb/shared/
+endif
+ifneq (,$(filter opennebula-rubygems, $(shell dh_listpackages)))
+	cp -a opennebula-rubygems-*/gems-dist dist/usr/share/one/
+endif
+	dh_auto_install
+ifneq (,$(filter opennebula-common, $(shell dh_listpackages)))
+	dh_install -p opennebula-common share/pkgs/sudoers/${DIR_SUDOERS}/opennebula \
+		/etc/sudoers.d
+	dh_install -p opennebula-common share/pkgs/tmpfiles/${DIR_TMPFILES}/opennebula.conf \
+		/usr/lib/tmpfiles.d/
+	dh_install -p opennebula-common share/pkgs/tmpfiles/${DIR_TMPFILES}/opennebula-node.conf \
+		/usr/lib/tmpfiles.d/
+endif
+ifneq (,$(filter opennebula, $(shell dh_listpackages)))
+	dh_install -p opennebula share/pkgs/logrotate/opennebula /etc/logrotate.d/
+	dh_install -p opennebula share/pkgs/logrotate/opennebula-scheduler /etc/logrotate.d/
+	dh_install -p opennebula share/pkgs/logrotate/opennebula-hem /etc/logrotate.d/
+
+	dh_install -p opennebula share/pkgs/services/${DIR_SERVICES}/opennebula.service \
+		/lib/systemd/system/
+	dh_install -p opennebula share/pkgs/services/${DIR_SERVICES}/opennebula-ssh-agent.service \
+		/lib/systemd/system/
+	dh_install -p opennebula share/pkgs/services/${DIR_SERVICES}/opennebula-ssh-socks-cleaner.service \
+		/lib/systemd/system/
+	dh_install -p opennebula share/pkgs/services/${DIR_SERVICES}/opennebula-ssh-socks-cleaner.timer \
+		/lib/systemd/system/
+	dh_install -p opennebula share/pkgs/services/${DIR_SERVICES}/opennebula-showback.service \
+		/lib/systemd/system/
+	dh_install -p opennebula share/pkgs/services/${DIR_SERVICES}/opennebula-showback.timer \
+		/lib/systemd/system/
+	dh_install -p opennebula share/pkgs/services/${DIR_SERVICES}/opennebula-scheduler.service \
+		/lib/systemd/system/
+	dh_install -p opennebula share/pkgs/services/${DIR_SERVICES}/opennebula-hem.service \
+		/lib/systemd/system/
+	dh_install -p opennebula share/augeas/oned.aug /usr/share/augeas/lenses/
+	dh_install -p opennebula share/pkgs/sudoers/opennebula-server /etc/sudoers.d/
+endif
+ifneq (,$(filter opennebula-sunstone, $(shell dh_listpackages)))
+	dh_install -p opennebula-sunstone share/pkgs/logrotate/opennebula-econe /etc/logrotate.d/
+	dh_install -p opennebula-sunstone share/pkgs/logrotate/opennebula-novnc /etc/logrotate.d/
+	dh_install -p opennebula-sunstone share/pkgs/logrotate/opennebula-sunstone /etc/logrotate.d/
+
+	dh_install -p opennebula-sunstone share/pkgs/services/${DIR_SERVICES}/opennebula-sunstone.service \
+		/lib/systemd/system/
+	dh_install -p opennebula-sunstone share/pkgs/services/${DIR_SERVICES}/opennebula-econe.service \
+		/lib/systemd/system/
+	dh_install -p opennebula-sunstone share/pkgs/services/${DIR_SERVICES}/opennebula-novnc.service \
+		/lib/systemd/system/
+endif
+ifneq (,$(filter opennebula-gate, $(shell dh_listpackages)))
+	dh_install -p opennebula-gate share/pkgs/logrotate/opennebula-gate /etc/logrotate.d/
+
+	dh_install -p opennebula-gate share/pkgs/services/${DIR_SERVICES}/opennebula-gate.service \
+		/lib/systemd/system/
+endif
+ifneq (,$(filter opennebula-flow, $(shell dh_listpackages)))
+	dh_install -p opennebula-flow share/pkgs/logrotate/opennebula-flow /etc/logrotate.d/
+
+	dh_install -p opennebula-flow share/pkgs/services/${DIR_SERVICES}/opennebula-flow.service \
+		/lib/systemd/system/
+endif
+ifneq (,$(filter opennebula-node, $(shell dh_listpackages)))
+	dh_install -p opennebula-node share/pkgs/sudoers/opennebula-node /etc/sudoers.d/
+	dh_install -p opennebula-node share/etc/sysctl.d/bridge-nf-call.conf /etc/sysctl.d/
+	dh_install -p opennebula-node share/etc/cron.d/opennebula-node /etc/cron.d/
+endif
+ifneq (,$(filter opennebula-node-firecracker, $(shell dh_listpackages)))
+	dh_install -p opennebula-node-firecracker share/pkgs/sudoers/opennebula-node-firecracker /etc/sudoers.d/
+	dh_install -p opennebula-node-firecracker share/etc/sysctl.d/bridge-nf-call.conf /etc/sysctl.d/
+	dh_install -p opennebula-node-firecracker share/etc/cron.d/opennebula-node /etc/cron.d/
+endif
+ifneq (,$(filter opennebula-tools, $(shell dh_listpackages)))
+	cp share/install_gems/${GEMFILE_LOCK}/Gemfile.lock dist/usr/share/one/
+endif
+ifneq (,$(filter python3-pyone, $(shell dh_listpackages)))
+	(cd src/oca/python/; make install3 ROOT=../../../dist)
+endif
+
+override_dh_installinit:
+ifneq (,$(filter opennebula, $(shell dh_listpackages)))
+	dh_installinit -p opennebula --name=opennebula --onlyscripts --no-start
+	dh_installinit -p opennebula --name=opennebula-scheduler --onlyscripts --no-start
+	dh_installinit -p opennebula --name=opennebula-hem --onlyscripts --no-start
+endif
+ifneq (,$(filter opennebula-sunstone, $(shell dh_listpackages)))
+	dh_installinit -p opennebula-sunstone --name=opennebula-sunstone --onlyscripts --no-start
+	dh_installinit -p opennebula-sunstone --name=opennebula-econe --onlyscripts --no-start
+	dh_installinit -p opennebula-sunstone --name=opennebula-novnc --onlyscripts --no-start
+endif
+ifneq (,$(filter opennebula-gate, $(shell dh_listpackages)))
+	dh_installinit -p opennebula-gate --name=opennebula-gate --onlyscripts --no-start
+endif
+ifneq (,$(filter opennebula-flow, $(shell dh_listpackages)))
+	dh_installinit -p opennebula-flow --name=opennebula-flow --onlyscripts --no-start
+endif
+	dh_installinit
+
+override_dh_installdeb:
+ifneq (,$(filter opennebula-node, $(shell dh_listpackages)))
+	sed "s/@LIBVIRTGRP@/${LIB_VIRT_GROUP}/g" debian/opennebula-node.postinst.in > debian/opennebula-node.postinst
+endif
+	dh_installdeb
+ifneq (,$(filter opennebula, $(shell dh_listpackages)))
+	# dynamically generate list of configuration files from remotes
+	find debian/opennebula/var/lib/one/remotes/etc -type f -printf '/var/lib/one/remotes/etc/%P\n' >>debian/opennebula/DEBIAN/conffiles
+endif
+
+override_dh_fixperms:
+	dh_fixperms
+ifneq (,$(filter opennebula, $(shell dh_listpackages)))
+	chmod 0440 debian/opennebula/etc/sudoers.d/opennebula-server
+endif
+ifneq (,$(filter opennebula-common, $(shell dh_listpackages)))
+	chmod 0440 debian/opennebula-common/etc/sudoers.d/opennebula
+endif
+ifneq (,$(filter opennebula-node, $(shell dh_listpackages)))
+	chmod 0440 debian/opennebula-node/etc/sudoers.d/opennebula-node
+endif
+ifneq (,$(filter opennebula-node-lxd, $(shell dh_listpackages)))
+	chmod 0440 debian/opennebula-node-lxd/etc/sudoers.d/opennebula-node-lxd
+endif
+ifneq (,$(filter opennebula-addon-tools, $(shell dh_listpackages)))
+	chmod 0440 debian/opennebula-addon-tools/etc/sudoers.d/one-extension-serversync
+endif
+ifneq (,$(filter opennebula-node-firecracker, $(shell dh_listpackages)))
+	chmod 0440 debian/opennebula-node-firecracker/etc/sudoers.d/opennebula-node-firecracker
+endif
+
+override_dh_systemd_start:
+	dh_systemd_start --no-start
+
+override_dh_systemd_enable:
+	dh_systemd_enable --no-enable
+
+override_dh_auto_clean:
+	dh_auto_clean
+	rm -rf dist/
+	#scons --clean .
+	-rm -Rf .scons_temp
+	-rm -Rf share/scons/lex_bison.pyc \
+		src/nebula/.xmlrpc_test/xmlrpc_test.* \
+		src/scheduler/.xmlrpc_test/xmlrpc_test.* \
+		src/scheduler/src/sched/.xmlrpc_test \
+		src/oca/java/org.opennebula.client.jar \
+		.xmlrpc_test
+	-rm -Rf debian/opennebula-node.postinst
+
+get-orig-source:
+	uscan --force-download --no-symlink
+
+.PHONY: override_dh_strip
+override_dh_strip:
+	dh_strip -p opennebula --dbg-package=opennebula-dbgsym

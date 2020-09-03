@@ -1,9 +1,0 @@
-#!/bin/sh
-
-set -e
-
-if [ "$1" = 'remove' ]; then
-    if [ -L /usr/share/one/gems ]; then
-        unlink /usr/share/one/gems
-    fi
-fi

@@ -20,15 +20,9 @@ elif [ "${DISTRO}" = 'ubuntu1604' ]; then
 elif [ "${DISTRO}" = 'ubuntu1804' ]; then
     CODENAME='bionic'
     GEMFILE_LOCK='Ubuntu1804'
-elif [ "${DISTRO}" = 'ubuntu1810' ]; then
-    CODENAME='cosmic'
-    GEMFILE_LOCK='Ubuntu1810'
-elif [ "${DISTRO}" = 'ubuntu1904' ]; then
-    CODENAME='disco'
-    GEMFILE_LOCK='Ubuntu1904'
-elif [ "${DISTRO}" = 'ubuntu1910' ]; then
-    CODENAME='eoan'
-    GEMFILE_LOCK='Ubuntu1910'
+elif [ "${DISTRO}" = 'ubuntu2004' ]; then
+    CODENAME='focal'
+    GEMFILE_LOCK='Ubuntu2004'
 else
     echo "ERROR: Invalid target '${DISTRO}'" >&2
     exit 1
@@ -51,7 +45,7 @@ PACKAGE=${SOURCE%.tar.gz} # opennebula-1.9.90
 
 NAME=$(echo "${PACKAGE}" | cut -d'-' -f1) # opennebula
 VERSION=$(echo "${PACKAGE}" |cut -d'-' -f2) # 1.9.90
-CONTACT=${CONTACT:-Unsupported Community Build}
+CONTACT=${CONTACT:-Unofficial Unsupported Build}
 BASE_NAME="${NAME}-${VERSION}-${PKG_VERSION}"
 GEMS_RELEASE="${VERSION}-${PKG_VERSION}"
 GIT_VERSION=${GIT_VERSION:-not known}
@@ -141,45 +135,12 @@ pbuilder-dist "${CODENAME}" amd64 create --updates-only ${PB_HTTP_PROXY}
 
 RUBYGEMS_REQ=''
 if [[ "${BUILD_COMPONENTS}" =~ rubygems ]]; then
-    echo '***** Building Ruby gems' >&2
-    PBUILDER_GEMS_DIR=$(mktemp -d)
+    echo '***** Downloading Ruby gems' >&2
 
-    # Workaround: Newer pbuilder-dist copies the script as /runscript,
-    # which breaks the rubygems directory detection if build.sh is
-    # passed directy.
-    RUN_RUBYGEMS_BUILD=$(mktemp)
-    cat - <<EOF >"${RUN_RUBYGEMS_BUILD}"
-#!/bin/sh
-"${PACKAGES_DIR}/rubygems/build.sh" \
-    "${BUILD_DIR_SPKG}/${NAME}_${VERSION}.orig.tar.gz" \
-    "${PBUILDER_GEMS_DIR}" \
-    "${GEMFILE_LOCK}" \
-    "${GEMS_RELEASE}" \
-    "${CONTACT}"
-EOF
-
-    # build Ruby gems
-    pbuilder-dist "${CODENAME}" amd64 \
-        execute --bindmounts "${PACKAGES_DIR} ${BUILD_DIR_SPKG} ${PBUILDER_GEMS_DIR}" -- \
-	"${RUN_RUBYGEMS_BUILD}"
-#--See workaround note above---
-#        "${PACKAGES_DIR}/rubygems/build.sh" \
-#        "${BUILD_DIR_SPKG}/${NAME}_${VERSION}.orig.tar.gz" \
-#        "${PBUILDER_GEMS_DIR}" \
-#        "${GEMFILE_LOCK}" \
-#        "${GEMS_RELEASE}"
-
-    unlink "${RUN_RUBYGEMS_BUILD}"
-
-    # generate requirements for all Ruby gem packages
-    for F in "${PBUILDER_GEMS_DIR}"/opennebula-rubygem-*.deb; do
-        _NAME=$(dpkg-deb -f "${F}" Package)
-        _VERS=$(dpkg-deb -f "${F}" Version)
-        RUBYGEMS_REQ="${RUBYGEMS_REQ}${_NAME} (= ${_VERS}), "
-    done
-
-    cp "${PBUILDER_GEMS_DIR}"/opennebula-rubygem-*.deb "${BUILD_DIR}"
-    rm -rf "${PBUILDER_GEMS_DIR}"
+    bash -x "${PACKAGES_DIR}/rubygems/download.sh" \
+        "${BUILD_DIR_SPKG}/${NAME}_${VERSION}.orig.tar.gz" \
+        "${GEMFILE_LOCK}" \
+        "opennebula-rubygems-${VERSION}.tar"
 fi
 
 ################################################################################

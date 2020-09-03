@@ -1,9 +1,0 @@
-#!/bin/sh
-
-set -e
-
-service opennebula-sunstone stop 2>/dev/null || :
-service opennebula-novnc stop 2>/dev/null || :
-service opennebula-econe stop 2>/dev/null || :
-
-#DEBHELPER#

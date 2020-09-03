@@ -56,6 +56,7 @@ cd "${BUILD_DIR}"
 
 "${SCONS:-scons}" -j2 \
     mysql=yes \
+    postgresql=yes \
     xmlrpc="${BUILD_DIR}/../xmlrpc-c/install" \
     new_xmlrpc=yes \
     "$@"

@@ -9,22 +9,6 @@ if [ "$1" = "configure" ]; then
     chgrp "${ONE_GROUP}" /etc/one
     chmod 0751 /etc/one
 
-    # Fix permissions oneadmin:oneadmin (0640/0750)
-    for F in /var/lock/one \
-        /var/log/one \
-        /var/run/one;
-    do
-        if [ -d "${F}" ]; then
-            chmod 0750 "${F}"
-        elif [ -f "${F}" ]; then
-            chmod 0640 "${F}"
-        else
-            continue
-        fi
-
-        chown "${ONE_USER}:${ONE_GROUP}" "${F}"
-    done
-
     # Fix permissions root:oneadmin (0640/0750) recursively
     for F in /etc/one/onegate-server.conf; do
         chgrp -R "${ONE_GROUP}" "${F}" || true
