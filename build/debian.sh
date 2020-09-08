@@ -96,6 +96,8 @@ for S in $URL "$@"; do
         DPKGS_BUILD_DIR="${BUILD_DIR_SPKG}/${PACKAGE}"
         cp -r "${PACKAGES_DIR}/templates/${DISTRO}/" "${DPKGS_BUILD_DIR}/debian"
     fi
+###### The next line is a patch
+wget -P "${DPKGS_BUILD_DIR:-${BUILD_DIR_SPKG}}"/ -q "http://downloads.opennebula.io/packages/opennebula-5.12.0.1/java-oca-5.12.0.1.tar.gz"
 done
 
 cd "${DPKGS_BUILD_DIR}"
