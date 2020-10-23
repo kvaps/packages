@@ -1,0 +1,50 @@
+#!/bin/sh
+
+set -e
+
+ONEHOME=/var/lib/one
+ONEAUTH=$ONEHOME/.one/one_auth
+ONE_GROUP=oneadmin
+ONE_USER=oneadmin
+
+if [ "$1" = "configure" ]; then
+    if [ ! -f /var/lib/one/sunstone/main.js ]; then
+        touch /var/lib/one/sunstone/main.js
+    fi
+
+    chown "${ONE_USER}:${ONE_GROUP}" /var/lib/one/sunstone/main.js
+
+    ###
+
+    chgrp "${ONE_GROUP}" /etc/one
+    chmod 0751 /etc/one
+
+    # Fix permissions root:oneadmin (0640/0750) recursively
+    for F in /etc/one/sunstone-server.conf \
+        /etc/one/sunstone-logos.yaml \
+        /etc/one/ec2query_templates/ \
+        /etc/one/econe.conf \
+        /etc/one/sunstone-views.yaml \
+        /etc/one/sunstone-views/;
+    do
+        chgrp -R "${ONE_GROUP}" "${F}" || true
+        find "${F}" -type d -exec chmod 0750 {} \; || true
+        find "${F}" -type f -exec chmod 0640 {} \; || true
+    done
+
+    # Fix permissions oneadmin:oneadmin (0640/0750)
+    for F in /var/lib/one/sunstone;
+    do
+        if [ -d "${F}" ]; then
+            chmod 0750 "${F}"
+        elif [ -f "${F}" ]; then
+            chmod 0640 "${F}"
+        else
+            continue
+        fi
+
+        chown "${ONE_USER}:${ONE_GROUP}" "${F}"
+    done
+fi
+
+dpkg-maintscript-helper mv_conffile /etc/one/sunstone-views/vcenter.yaml /etc/one/sunstone-views/admin_vcenter.yaml 4.10.2-1 -- "$@"

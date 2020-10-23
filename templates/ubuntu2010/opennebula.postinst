@@ -1,0 +1,91 @@
+#!/bin/sh
+
+set -e
+
+ONEHOME=/var/lib/one
+ONEAUTH=$ONEHOME/.one/one_auth
+ONE_GROUP=oneadmin
+ONE_USER=oneadmin
+
+ssh_key_configure() {
+    if ! [ -d "$ONEHOME/.ssh" ]; then
+        mkdir "$ONEHOME/.ssh"
+        chown "${ONE_USER}:${ONE_GROUP}" "$ONEHOME/.ssh"
+        chmod 755 "$ONEHOME/.ssh"
+    fi
+    if ! [ -f "$ONEHOME/.ssh/id_rsa" ]; then
+        su $ONE_USER -c "ssh-keygen -N '' -t rsa -f $ONEHOME/.ssh/id_rsa"
+        if ! [ -f "$ONEHOME/.ssh/authorized_keys" ]; then
+            cp -p "$ONEHOME/.ssh/id_rsa.pub" "$ONEHOME/.ssh/authorized_keys"
+            chmod 600 "$ONEHOME/.ssh/authorized_keys"
+        fi
+    fi
+}
+
+if [ "$1" = "configure" ]; then
+    ssh_key_configure
+
+    if ! [ -d "$ONEHOME/.one" ]; then
+        mkdir "$ONEHOME/.one"
+        chown "${ONE_USER}:${ONE_GROUP}" "$ONEHOME/.one"
+        chmod 700 "$ONEHOME/.one"
+    fi
+
+    if [ ! -f $ONEAUTH ]; then
+        ONE_PASSWORD=$(apg -m 12 -M cNl -n 1)
+        if [ -n "${ONE_PASSWORD}" ]; then
+            echo "${ONE_USER}:${ONE_PASSWORD}" > $ONEAUTH
+            chown "${ONE_USER}:${ONE_GROUP}" "${ONEAUTH}"
+            chmod 600 "$ONEAUTH"
+        fi
+    fi
+
+    chgrp "${ONE_GROUP}" /etc/one
+    chmod 0751 /etc/one
+    chown -R "${ONE_USER}:${ONE_GROUP}" /var/lib/one/remotes
+    chmod -R o-rwx /var/lib/one/remotes
+
+    # Fix permissions root:oneadmin (0640/0750) recursively
+    for F in /etc/one/auth/ \
+        /etc/one/defaultrc \
+        /etc/one/tmrc \
+        /etc/one/hm/ \
+        /etc/one/oned.conf \
+        /etc/one/onehem-server.conf \
+        /etc/one/sched.conf \
+        /etc/one/monitord.conf \
+        /etc/one/vmm_exec/ \
+        /etc/one/az_driver.conf \
+        /etc/one/az_driver.default \
+        /etc/one/ec2_driver.conf \
+        /etc/one/ec2_driver.default \
+        /etc/one/vcenter_driver.default;
+    do
+        chgrp -R "${ONE_GROUP}" "${F}"
+
+        if [ -d "${F}" ]; then
+            find "${F}" -type d -exec chmod 0750 {} \; || true
+        else
+            find "${F}" -type f -exec chmod 0640 {} \; || true
+        fi
+    done
+
+    # Fix permissions oneadmin:oneadmin (0640/0750)
+    for F in /var/lib/one \
+        /var/lib/one/vms \
+        /var/lib/one/datastores \
+        /var/lib/one/remotes;
+    do
+        if [ -d "${F}" ]; then
+            chmod 0750 "${F}"
+        elif [ -f "${F}" ]; then
+            chmod 0640 "${F}"
+        else
+            continue
+        fi
+
+        chown "${ONE_USER}:${ONE_GROUP}" "${F}"
+    done
+fi
+
+#DEBHELPER#

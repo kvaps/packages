@@ -1,0 +1,3 @@
+src/svncterm_server/svncterm_server                                    /usr/bin/
+share/pkgs/sudoers/opennebula-node-lxd                                 /etc/sudoers.d/
+src/vmm_mad/remotes/lib/lxd/catfstab                                   /usr/bin/

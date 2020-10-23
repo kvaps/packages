@@ -1,0 +1,104 @@
+#!/bin/sh
+
+set -e
+
+ONE_USER=oneadmin
+
+if [ "$1" = "configure" ]; then
+    if ! command -v lxd >/dev/null; then
+        export PATH=$PATH:/snap/bin
+    fi
+
+    # customizations only on LXD from snap
+    if [ -f /snap/bin/lxc ]; then
+        # sudo should find the 'lxc' command not specified
+        # as absolute path in a sudo "secure_path" directories
+        if ! [ -f /usr/bin/lxc ]; then
+            ln -s /snap/bin/lxc /usr/bin/lxc
+        fi
+    fi
+
+    ###
+
+    # Add oneadmin user into lxd group
+    if getent group lxd >/dev/null; then
+        if ! getent group lxd | cut -f4 -d: | grep -q "\<${ONE_USER}\>"; then
+            adduser "${ONE_USER}" lxd
+        fi
+    fi
+
+    # Configure LXD daemon
+    cat <<EOF | lxd init --preseed
+config: {}
+cluster: null
+networks: []
+storage_pools:
+- config: {}
+  description: ""
+  name: default
+  driver: dir
+profiles:
+  - name: default
+    description: Default LXD profile  for OpenNebula
+    config:
+       limits.cpu: "1"
+       limits.cpu.allowance: 50%
+       limits.memory: 512MB
+       security.idmap.base: "100000"
+       security.idmap.isolated: "true"
+       security.idmap.size: "65536"
+    devices:
+      root:
+        path: /
+        pool: default
+        type: disk
+EOF
+
+    #TODO: move into package contained configuration files
+    # LXD required modules for storage
+    PARAMS_LOOP='max_loop=256'
+    PARAMS_NBD='nbds_max=256'
+
+    OLD_MODULES_CONF='opennebula-lxd.conf'
+    MODULES_CONF='opennebula-node-lxd.conf'
+
+    # migrate pre-5.10 configuration
+    if [ -f "/etc/modprobe.d/${OLD_MODULES_CONF}" ]; then
+        if [ -f "/etc/modprobe.d/${MODULES_CONF}" ]; then
+            rm "/etc/modprobe.d/${OLD_MODULES_CONF}"
+        else
+            mv "/etc/modprobe.d/${OLD_MODULES_CONF}" "/etc/modprobe.d/${MODULES_CONF}"
+        fi
+    fi
+
+    if [ -f "/etc/modules-load.d/${OLD_MODULES_CONF}" ]; then
+        if [ -f "/etc/modules-load.d/${MODULES_CONF}" ]; then
+            rm "/etc/modules-load.d/${OLD_MODULES_CONF}"
+        else
+            mv "/etc/modules-load.d/${OLD_MODULES_CONF}" "/etc/modules-load.d/${MODULES_CONF}"
+        fi
+    fi
+
+    # generate new configuration if missing
+    if ! [ -f "/etc/modprobe.d/${MODULES_CONF}" ]; then
+        cat - <<EOF >"/etc/modprobe.d/${MODULES_CONF}"
+options loop ${PARAMS_LOOP}
+options nbd  ${PARAMS_NBD}
+EOF
+    fi
+
+    if ! [ -f "/etc/modules-load.d/${MODULES_CONF}" ]; then
+        cat - <<EOF >"/etc/modules-load.d/${MODULES_CONF}"
+loop
+nbd
+EOF
+    fi
+
+    modprobe loop "${PARAMS_LOOP}"
+    modprobe nbd  "${PARAMS_NBD}"
+
+    # cleanup pre-5.10 LXD sudoers on upgrade
+    if [ -n "$2" ] && [ -f /etc/sudoers.d/opennebula-lxd ]; then
+        rm -f /etc/sudoers.d/opennebula-lxd
+    fi
+fi

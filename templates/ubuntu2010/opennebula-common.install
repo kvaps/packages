@@ -1,0 +1,2 @@
+dist/usr/share/doc/one/*  /usr/share/doc/one/
+dist/usr/share/one/ssh/*  /usr/share/one/ssh/

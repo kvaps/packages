@@ -1,0 +1,12 @@
+Import new upstream release
+===========================
+
+Upstream as some JAR files inside its source tarball so we may exclude them
+during import into GIT repository.
+
+(from inside existing git repository)
+git-import-orig -u1.9.80 --filter "*.jar" \
+		--filter-pristine-tar --pristine-tar \
+                ../one-2.0-beta1.tar.gz
+
+It's done by debian/orig-tar.sh (called from debian/rules get-orig-source target)

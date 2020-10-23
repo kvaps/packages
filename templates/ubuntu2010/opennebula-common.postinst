@@ -1,0 +1,72 @@
+#!/bin/sh
+
+set -e
+
+ONEHOME=/var/lib/one
+ONE_GROUP=oneadmin
+ONE_USER=oneadmin
+ONE_UID=9869
+ONE_GID=9869
+
+create_cloudgroup() {
+    if ! getent group $ONE_GROUP > /dev/null 2>&1; then
+        addgroup --system --gid $ONE_GID $ONE_GROUP
+    fi
+}
+
+create_oneuser() {
+    if ! getent passwd $ONE_USER > /dev/null 2>&1; then
+        adduser --system --uid $ONE_UID --ingroup $ONE_GROUP --home $ONEHOME --shell /bin/bash $ONE_USER
+    else
+        ONEHOME=`getent passwd $ONE_USER | cut -f6 -d:`
+        # Renable user (give him a shell)
+        usermod --shell /bin/bash $ONE_USER
+    fi
+
+    if ! getent group disk | grep '\b$ONE_USER\b' &>/dev/null; then
+        usermod -a -G disk $ONE_USER
+    fi
+}
+
+if [ "$1" = "configure" ]; then
+    create_cloudgroup
+    create_oneuser
+
+    # Use dpkg-statoverride instead of direct chmod/chown
+    if ! dpkg-statoverride --list $ONEHOME >/dev/null 2>&1; then
+        dpkg-statoverride --update --add $ONE_USER $ONE_GROUP 750 $ONEHOME
+    fi
+
+    # install ~oneadmin/.ssh/config if not present on a fresh install only
+    if [ ! -e "${ONEHOME}/.ssh/config" ] && [ -z "$2" ]; then
+        if [ ! -d "${ONEHOME}/.ssh" ]; then
+            mkdir -p "${ONEHOME}/.ssh"
+            chmod 0700 "${ONEHOME}/.ssh"
+            chown "$ONE_USER:$ONE_GROUP" "${ONEHOME}/.ssh"
+        fi
+        cp /usr/share/one/ssh/config "${ONEHOME}/.ssh/config"
+        chmod 0600 "${ONEHOME}/.ssh/config"
+        chown "$ONE_USER:$ONE_GROUP" "${ONEHOME}/.ssh/config"
+    fi
+
+    systemd-tmpfiles --create /usr/lib/tmpfiles.d/opennebula.conf
+    systemd-tmpfiles --create /usr/lib/tmpfiles.d/opennebula-node.conf
+
+    # Fix permissions oneadmin:oneadmin (0640/0750)
+    for F in /var/lock/one \
+        /var/log/one \
+        /var/run/one;
+    do
+        if [ -d "${F}" ]; then
+            chmod 0750 "${F}"
+        elif [ -f "${F}" ]; then
+            chmod 0640 "${F}"
+        else
+            continue
+        fi
+
+        chown "${ONE_USER}:${ONE_GROUP}" "${F}"
+    done
+fi
+
+#DEBHELPER#

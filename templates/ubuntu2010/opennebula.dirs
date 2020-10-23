@@ -1,0 +1,5 @@
+/var/lib/one/
+/var/lib/one/datastores/
+/etc/one/auth/certificates/
+/usr/lib/one/ruby/onedb/local
+/usr/lib/one/ruby/onedb/shared

@@ -1,0 +1,83 @@
+=========================================
+opennebula-node Debian package
+=========================================
+
+'opennebula-common' Debian package contains scripts to create "cloud" group,
+create "oneadmin" account and setup initial ssh key.
+
+'opennebula-node' depends on opennebula-common and also
+1) add "oneadmin" account inside "libvirt" group.
+1) add "oneadmin" account inside "kvm" group.
+
+libvirt support
+---------------
+OpenNebula uses the libvirt interface to interact with KVM.
+So after installation of 'opennebula-node', you should check if libvirt is
+correctly working on current machine.
+
+1. Check for hardware support
+ * vmx is Intel's VT technology
+ * svm is AMD's V technology
+
+  root@node01> egrep '(vmx|svm)' /proc/cpuinfo
+
+2. Check for loaded modules
+
+  root@node01> lsmod | grep "kvm\(.*\)"
+
+3. Default NAT network have to be started before any VM
+
+  root@node01> virsh -c qemu:///system net-start default
+  root@node01> virsh -c qemu:///system net-autostart default
+  root@node01> ip link show virbr0
+
+4. Change default user/group running libvirt
+
+ You also need to modify /etc/libvirt/qemu.conf to set oneadmin
+ user as running user for libvirt daemon.
+ Otherwise, you might get some errors like :
+   could not open disk image /var/lib/one/datastores/0/0/disk.0: Permission denied
+
+ root@node01> vi /etc/libvirt/qemu.conf
+-------------------
+ user = "oneadmin"
+ group = "cloud"
+ dynamic_ownership = 0
+-------------------
+ root@node01> /etc/init.d/libvirt-bin restart
+
+  Guidelines :
+  /usr/share/doc/libvirt-bin/README.Debian
+
+Add current host into OpenNebula pool
+-----------------------------------------
+
+1. Copy controller ssh key to current node
+
+  root@controller> su - oneadmin
+  oneadmin@controller> cat $HOME/.ssh/id_rsa.pub
+  <COPY YOUR CONTROLLER SSH PUBKEY>
+
+  root@node01> su - oneadmin
+  oneadmin@node01> vi $HOME/.ssh/authorized_keys
+  <PAST YOUR CONTROLLER SSH PUBKEY>
+
+2. Test an connection from controller to current node
+
+  root@controller> su - oneadmin
+  oneadmin@controller> ssh oneadmin@node01
+    The authenticity of host 'node01 (192.168.0.2)' can't be established.
+    RSA key fingerprint is [xx].
+    Are you sure you want to continue connecting (yes/no)? [yes]
+    Warning: Permanently added 'node01,192.168.0.2' (RSA) to the list of known hosts.
+  oneadmin@node01>
+
+3. Add current host into OpenNebula pool
+
+  oneadmin@controller> onehost create node01 --im im_kvm --vm vmm_kvm --net dummy
+
+4. Check node registration on controller
+
+  oneadmin@controller> onehost list
+  ID NAME              CLUSTER  RVM   TCPU   FCPU   ACPU    TMEM    FMEM STAT
+   0 node01            default    0    400    388    400    3.9G    2.5G   on

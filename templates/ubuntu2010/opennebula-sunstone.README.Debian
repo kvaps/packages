@@ -1,0 +1,67 @@
+=========================================
+opennebula-sunstone Debian package
+=========================================
+
+'opennebula-sunstone' Debian package contains OpenNebula Sunstone
+which is the new OpenNebula web GUI. After installation of this package,
+OpenNebula Sunstone daemon will start.
+
+Parameters
+----------
+
+Static files are installed here :
+/usr/share/opennebula/sunstone
+
+Startup script is here :
+/etc/init.d/opennebula-sunstone
+
+By default, sunstone only listen to 127.0.0.1 on port 9869.
+
+Using opennebula-sunstone on a different machine than opennebula
+----------------------------------------------------------------
+Define the following environment variables for the running
+user of sunstone-server :
+
+  - Set the XMLRPC parameters:
+  Modify '/etc/one/sunstone-server.conf'
+  :one_xmlrpc: => needs to point to the controller's IP.
+
+  - Set the serveradmin password:
+
+  root@sunstone-server> su - oneadmin
+  oneadmin@sunstone-server> mkdir .one; cd .one
+  oneadmin@sunstone-server> scp oneadmin@controller:.one/sunstone_auth .
+
+  <URL:http://opennebula.org/documentation:rel3.2:sunstone>
+
+
+Using opennebula-sunstone over an SSL proxy
+-------------------------------------------
+A detailed configuration guide can be found on upstream website:
+<URL:http://opennebula.org/documentation:rel3.4:sunstone#configuring_a_ssl_proxy>
+
+Here is a quick start, for Apache Debian package:
+
+ root@sunstone-server> a2enmod proxy_http
+ root@sunstone-server> a2enmod ssl
+
+Then, add to /etc/apache2/sites-enabled/default-ssl:
+
+        # For opennebula sunstone proxying
+        <Proxy *>
+               Order deny,allow
+               Allow from all
+        </Proxy>
+
+        <Location />
+              ProxyPass        http://localhost:9869/
+              ProxyPassReverse http://localhost:9869/
+        </Location>
+
+inside the <VirtualHost>.
+
+Then restart apache:
+
+ root@sunstone-server> /etc/init.d/apache2 restart
+
+

@@ -1,0 +1,5 @@
+#!/bin/sh
+
+service opennebula-flow stop 2>/dev/null || :
+
+#DEBHELPER#

@@ -1,0 +1,63 @@
+### See https://github.com/OpenNebula/packages/issues/68
+#dist/var/lib/one/datastores/*                /var/lib/one/datastores
+dist/var/lib/one/remotes/*                    /var/lib/one/remotes/
+dist/var/lib/one/vms             /var/lib/one/
+
+dist/etc/one/defaultrc           /etc/one/
+dist/etc/one/tmrc                /etc/one/
+dist/etc/one/oned.conf           /etc/one/
+dist/etc/one/onehem-server.conf  /etc/one/
+dist/etc/one/sched.conf          /etc/one/
+dist/etc/one/monitord.conf       /etc/one/
+dist/etc/one/ec2_driver.conf     /etc/one/
+dist/etc/one/ec2_driver.default  /etc/one/
+dist/etc/one/az_*                /etc/one/
+dist/etc/one/vcenter_driver.default   /etc/one/
+
+dist/etc/one/hm/*                  /etc/one/hm/
+#dist/etc/one/im_ec2/*              /etc/one/im_ec2/
+#dist/etc/one/vmm_ec2/*             /etc/one/vmm_ec2/
+dist/etc/one/vmm_exec/*            /etc/one/vmm_exec/
+dist/etc/one/auth/*                /etc/one/auth/
+
+dist/usr/lib/one/sh/*           /usr/lib/one/sh/
+dist/usr/lib/one/mads/*         /usr/lib/one/mads/
+dist/usr/lib/one/onehem/*       /usr/lib/one/onehem/
+
+dist/usr/lib/one/ruby/CommandManager.rb    /usr/lib/one/ruby/
+dist/usr/lib/one/ruby/OpenNebulaDriver.rb  /usr/lib/one/ruby/
+dist/usr/lib/one/ruby/scripts_common.rb    /usr/lib/one/ruby/
+dist/usr/lib/one/ruby/ssh_stream.rb        /usr/lib/one/ruby/
+
+dist/usr/lib/one/ruby/az_driver.rb  /usr/lib/one/ruby/
+dist/usr/lib/one/ruby/ec2_driver.rb /usr/lib/one/ruby/
+dist/usr/lib/one/ruby/nsx_driver.rb /usr/lib/one/ruby/
+dist/usr/lib/one/ruby/nsx_driver/*  /usr/lib/one/ruby/nsx_driver/
+dist/usr/lib/one/ruby/opennebula_driver.rb /usr/lib/one/ruby/
+dist/usr/lib/one/ruby/packet_driver.rb      /usr/lib/one/ruby/
+dist/usr/lib/one/ruby/vcenter_driver.rb     /usr/lib/one/ruby/
+dist/usr/lib/one/ruby/vcenter_driver/*      /usr/lib/one/ruby/vcenter_driver/
+
+dist/usr/lib/one/ruby/onedb/fsck/*         /usr/lib/one/ruby/onedb/fsck/
+dist/usr/lib/one/ruby/onedb/patches/*      /usr/lib/one/ruby/onedb/patches/
+dist/usr/lib/one/ruby/onedb/*.rb           /usr/lib/one/ruby/onedb/
+
+dist/usr/lib/one/ruby/one_vnm.rb                              /usr/lib/one/ruby/
+dist/usr/lib/one/ruby/DriverExecHelper.rb                     /usr/lib/one/ruby/
+dist/usr/lib/one/ruby/ActionManager.rb                        /usr/lib/one/ruby/
+dist/usr/lib/one/ruby/VirtualMachineDriver.rb                 /usr/lib/one/ruby/
+dist/usr/lib/one/ruby/PublicCloudDriver.rb                    /usr/lib/one/ruby/
+
+dist/usr/share/one/examples/*       /usr/share/one/examples/
+dist/usr/share/one/esx-fw-vnc/*     /usr/share/one/esx-fw-vnc/
+dist/usr/share/one/follower_cleanup /usr/share/one/
+dist/usr/share/one/start-scripts/*  /usr/share/one/start-scripts/
+dist/usr/share/one/schemas/*        /usr/share/one/schemas/
+dist/usr/share/one/conf/*           /usr/share/one/conf/
+dist/usr/share/one/context/*        /usr/share/one/context/
+
+dist/usr/bin/oned          /usr/bin/
+dist/usr/bin/mm_sched      /usr/bin/
+dist/usr/bin/onedb         /usr/bin/
+dist/usr/bin/one           /usr/bin/
+dist/usr/bin/onehem-server /usr/bin/

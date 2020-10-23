@@ -1,0 +1,24 @@
+#!/bin/sh
+
+set -e
+
+ONE_USER=oneadmin
+
+if [ "$1" = 'remove' ]; then
+    # Remove oneadmin user from lxd group
+    if getent group lxd >/dev/null; then
+        if getent group lxd | cut -f4 -d: | grep -q "\<${ONE_USER}\>"; then
+            deluser "${ONE_USER}" lxd
+        fi
+    fi
+fi
+
+if [ "$1" = 'purge' ]; then
+    for F in '/etc/modprobe.d/opennebula-node-lxd.conf' \
+        '/etc/modules-load.d/opennebula-node-lxd.conf';
+    do
+        if test -f "${F}"; then
+            rm "${F}"
+        fi
+    done
+fi
