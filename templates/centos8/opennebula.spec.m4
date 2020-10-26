@@ -834,7 +834,7 @@ install -p -D -m 644 share/etc/sysctl.d/bridge-nf-call.conf %{buildroot}%{_sysco
 install -p -D -m 644 share/etc/cron.d/opennebula-node %{buildroot}%{_sysconfdir}/cron.d/opennebula-node
 
 # Gemfile
-%if %{gemfile_lock}
+%if %{defined gemfile_lock}
 install -p -D -m 644 share/install_gems/%{gemfile_lock}/Gemfile.lock %{buildroot}/usr/share/one/Gemfile.lock
 %endif
 
@@ -1488,7 +1488,7 @@ sleep 10
 
 %{_datadir}/one/install_gems
 %{_datadir}/one/Gemfile
-%if %{gemfile_lock}
+%if %{defined gemfile_lock}
 %{_datadir}/one/Gemfile.lock
 %endif
 

@@ -24,6 +24,12 @@ elif [ "${DISTRO}" = 'fedora32' ]; then
     MOCK_PARAMS='--use-bootstrap-image'
     DIST_TAG='fc32'
     GEMFILE_LOCK='Fedora32'
+elif [ "${DISTRO}" = 'fedora33' ]; then
+    TEMPLATES='centos8'
+    MOCK_CFG='fedora-33-x86_64'
+    MOCK_PARAMS='--use-bootstrap-image'
+    DIST_TAG='fc33'
+    GEMFILE_LOCK='Fedora33'
 else
     echo "ERROR: Invalid target '${DISTRO}'" >&2
     exit 1
