@@ -1371,12 +1371,16 @@ sleep 10
 ################################################################################
 %files -n python-pyone
 %defattr(-, root, root, 0755)
+%dir %{python_sitelib}/pyone
 %{python_sitelib}/pyone/*
+%dir %{python_sitelib}/pyone*.egg-info
 %{python_sitelib}/pyone*.egg-info/*
 
 %files -n python3-pyone
 %defattr(-, root, root, 0755)
+%dir %{python3_sitelib}/pyone
 %{python3_sitelib}/pyone/*
+%dir %{python3_sitelib}/pyone*.egg-info
 %{python3_sitelib}/pyone*.egg-info/*
 
 ################################################################################

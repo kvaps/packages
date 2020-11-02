@@ -1456,14 +1456,18 @@ sleep 10
 %if %{with_oca_python2}
 %files -n python-pyone
 %defattr(-, root, root, 0755)
+%dir %{python2_sitelib}/pyone
 %{python2_sitelib}/pyone/*
+%dir %{python2_sitelib}/pyone*.egg-info
 %{python2_sitelib}/pyone*.egg-info/*
 %endif
 
 %if %{with_oca_python3}
 %files -n python3-pyone
 %defattr(-, root, root, 0755)
+%dir %{python3_sitelib}/pyone
 %{python3_sitelib}/pyone/*
+%dir %{python3_sitelib}/pyone*.egg-info
 %{python3_sitelib}/pyone*.egg-info/*
 %endif
 
