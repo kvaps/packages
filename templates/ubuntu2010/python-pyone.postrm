@@ -1,0 +1,5 @@
+#!/bin/sh
+echo ""
+echo "WARNING: Unmanaged dependencies, please consider uninstalling following:"
+echo "pip uninstall six aenum lxml dicttoxml future tblib xmltodict"
+echo ""

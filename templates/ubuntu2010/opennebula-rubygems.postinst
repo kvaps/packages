@@ -1,0 +1,10 @@
+#!/bin/sh
+
+set -e
+
+# only new package installations
+if [ "$1" = 'configure' ] && [ -z "$2" ]; then
+    if [ ! -e /usr/share/one/gems ]; then
+        ln -s gems-dist /usr/share/one/gems
+    fi
+fi

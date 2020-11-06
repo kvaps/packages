@@ -23,6 +23,9 @@ elif [ "${DISTRO}" = 'ubuntu1804' ]; then
 elif [ "${DISTRO}" = 'ubuntu2004' ]; then
     CODENAME='focal'
     GEMFILE_LOCK='Ubuntu2004'
+elif [ "${DISTRO}" = 'ubuntu2010' ]; then
+    CODENAME='groovy'
+    GEMFILE_LOCK='Ubuntu2010'
 else
     echo "ERROR: Invalid target '${DISTRO}'" >&2
     exit 1

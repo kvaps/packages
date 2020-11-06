@@ -1,0 +1,5 @@
+#!/bin/sh
+echo ""
+echo "WARNING: Unmanaged dependencies, please install following:"
+echo "pip3 install six aenum lxml dicttoxml tblib xmltodict"
+echo ""

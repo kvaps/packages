@@ -1,0 +1,20 @@
+#!/bin/sh
+
+set -e
+
+ONE_USER=oneadmin
+ONE_GROUP=oneadmin
+
+if [ "$1" = "configure" ]; then
+    chgrp "${ONE_GROUP}" /etc/one
+    chmod 0751 /etc/one
+
+    # Fix permissions root:oneadmin (0640/0750) recursively
+    for F in /etc/one/onegate-server.conf; do
+        chgrp -R "${ONE_GROUP}" "${F}" || true
+        find "${F}" -type d -exec chmod 0750 {} \; || true
+        find "${F}" -type f -exec chmod 0640 {} \; || true
+    done
+fi
+
+#DEBHELPER#

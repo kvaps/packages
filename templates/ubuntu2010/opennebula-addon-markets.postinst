@@ -1,0 +1,12 @@
+#!/bin/sh
+
+set -e
+
+ONE_GROUP=oneadmin
+ONE_USER=oneadmin
+
+if [ "$1" = "configure" ]; then
+    chown -R $ONE_USER:$ONE_GROUP /var/lib/one/remotes/market/turnkeylinux/
+fi
+
+#DEBHELPER#

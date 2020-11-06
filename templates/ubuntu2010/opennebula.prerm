@@ -1,0 +1,10 @@
+#!/bin/sh
+
+set -e
+
+service opennebula stop 2>/dev/null || :
+service opennebula-scheduler stop 2>/dev/null || :
+service opennebula-hem stop 2>/dev/null || :
+service opennebula-ssh-agent stop 2>/dev/null || :
+
+#DEBHELPER#

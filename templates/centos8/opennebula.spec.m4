@@ -27,7 +27,7 @@
     %global __brp_mangle_shebangs_exclude_from ^(\/var\/lib\/one\/remotes\|\/usr\/share\/one\/gems-dist\/gems\|\/usr\/lib\/one\/sunstone\/public\/bower_components\/no-vnc\/node_modules\/uri-js\/dist\/esnext)/
 
     # don't generate automatic requirements from bower components
-    %global __requires_exclude_from ^\/usr\/lib\/one\/sunstone\/public\/bower_components\/.*$
+    %global __requires_exclude_from ^(\/usr\/lib\/one\/sunstone\/public\/bower_components\/.*|\/usr\/lib\/python.*\/site-packages\/pyone-.*\.egg-info.*)$
 %endif
 
 %if 0%{?rhel} == 8
@@ -39,7 +39,7 @@
     %global __brp_mangle_shebangs_exclude_from ^(\/var\/lib\/one\/remotes\|\/usr\/share\/one\/gems-dist\/gems)/
 
     # don't generate automatic requirements from bower components
-    %global __requires_exclude_from ^\/usr\/lib\/one\/sunstone\/public\/bower_components\/.*$
+    %global __requires_exclude_from ^(\/usr\/lib\/one\/sunstone\/public\/bower_components\/.*|\/usr\/lib\/python.*\/site-packages\/pyone-.*\.egg-info.*)$
 %endif
 
 %if 0%{?rhel} == 7
@@ -834,7 +834,7 @@ install -p -D -m 644 share/etc/sysctl.d/bridge-nf-call.conf %{buildroot}%{_sysco
 install -p -D -m 644 share/etc/cron.d/opennebula-node %{buildroot}%{_sysconfdir}/cron.d/opennebula-node
 
 # Gemfile
-%if %{gemfile_lock}
+%if %{defined gemfile_lock}
 install -p -D -m 644 share/install_gems/%{gemfile_lock}/Gemfile.lock %{buildroot}/usr/share/one/Gemfile.lock
 %endif
 
@@ -1537,14 +1537,18 @@ sleep 10
 %if %{with_oca_python2}
 %files -n python-pyone
 %defattr(-, root, root, 0755)
+%dir %{python2_sitelib}/pyone
 %{python2_sitelib}/pyone/*
+%dir %{python2_sitelib}/pyone*.egg-info
 %{python2_sitelib}/pyone*.egg-info/*
 %endif
 
 %if %{with_oca_python3}
 %files -n python3-pyone
 %defattr(-, root, root, 0755)
+%dir %{python3_sitelib}/pyone
 %{python3_sitelib}/pyone/*
+%dir %{python3_sitelib}/pyone*.egg-info
 %{python3_sitelib}/pyone*.egg-info/*
 %endif
 
@@ -1569,7 +1573,7 @@ sleep 10
 
 %{_datadir}/one/install_gems
 %{_datadir}/one/Gemfile
-%if %{gemfile_lock}
+%if %{defined gemfile_lock}
 %{_datadir}/one/Gemfile.lock
 %endif
 

@@ -1,0 +1,2 @@
+# Depends on ruby via ruby-opennebula
+opennebula-provision binary: ruby-script-but-no-ruby-dep

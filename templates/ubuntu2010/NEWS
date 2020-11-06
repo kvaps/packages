@@ -1,0 +1,16 @@
+opennebula (3.2.1-1) unstable; urgency=low
+
+  OpenNebula 3.x requires the user to run a script to update an existing
+  database to the installed version. You will know when you need to run
+  the script when the following message is displayed after upgrading:
+
+  -------------------
+  #Database version mismatch.
+  oned failed to start
+  -------------------
+
+  To upgrade the Database run
+  oneadmin@controller> onedb upgrade -v --sqlite /var/lib/one/one.db
+ 
+
+ -- Damien Raude-Morvan <drazzib@debian.org>  Fri, 18 May 2012 19:47:56 +0200

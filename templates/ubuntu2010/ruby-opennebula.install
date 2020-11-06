@@ -1,0 +1,12 @@
+dist/usr/lib/one/ruby/opennebula.rb /usr/lib/one/ruby/
+
+dist/usr/lib/one/ruby/cloud/CloudServer.rb   /usr/lib/one/ruby/cloud/
+dist/usr/lib/one/ruby/cloud/CloudAuth.rb     /usr/lib/one/ruby/cloud/
+dist/usr/lib/one/ruby/cloud/CloudAuth/*      /usr/lib/one/ruby/cloud/CloudAuth/
+
+dist/usr/lib/one/ruby/opennebula/*           /usr/lib/one/ruby/opennebula/
+
+dist/usr/lib/one/sunstone/models/OpenNebulaJSON.rb      /usr/lib/one/ruby/
+dist/usr/lib/one/sunstone/models/OpenNebulaJSON/*       /usr/lib/one/ruby/OpenNebulaJSON/
+
+dist/usr/lib/one/ruby/vendors/packethost/    /usr/lib/one/ruby/vendors/

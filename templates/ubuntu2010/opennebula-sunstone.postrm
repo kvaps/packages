@@ -1,0 +1,20 @@
+#!/bin/sh
+
+set -e
+
+if [ "$1" = 'remove' ]; then
+    if [ -f /var/lib/one/sunstone/main.js ]; then
+        rm -f /var/lib/one/sunstone/main.js 2>/dev/null || :
+    fi
+
+elif [ "$1" = 'purge' ]; then
+    # Remove logs
+    rm -rf /var/log/one/sunstone.log* \
+        /var/log/one/sunstone.error* \
+        /var/log/one/novnc.log* \
+        /var/log/one/econe-server.log*
+fi
+
+dpkg-maintscript-helper mv_conffile /etc/one/sunstone-views/vcenter.yaml /etc/one/sunstone-views/admin_vcenter.yaml 4.10.2-1 -- "$@"
+
+#DEBHELPER#

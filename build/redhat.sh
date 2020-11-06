@@ -24,6 +24,12 @@ elif [ "${DISTRO}" = 'fedora32' ]; then
     MOCK_PARAMS='--use-bootstrap-image'
     DIST_TAG='fc32'
     GEMFILE_LOCK='Fedora32'
+elif [ "${DISTRO}" = 'fedora33' ]; then
+    TEMPLATES='centos8'
+    MOCK_CFG='fedora-33-x86_64'
+    MOCK_PARAMS='--use-bootstrap-image'
+    DIST_TAG='fc33'
+    GEMFILE_LOCK='Fedora33'
 else
     echo "ERROR: Invalid target '${DISTRO}'" >&2
     exit 1
@@ -138,7 +144,19 @@ m4 -D_VERSION_="${VERSION}" \
 _BUILD_COMPONENTS_LC=${BUILD_COMPONENTS,,}
 _WITH_COMPONENTS=${_BUILD_COMPONENTS_LC:+ --with ${_BUILD_COMPONENTS_LC//[[:space:]]/ --with }}
 
-mock -r "${MOCK_CFG}" ${MOCK_PARAMS} --bootstrap-chroot --init
+RETRY=3
+while true; do
+    if mock -r "${MOCK_CFG}" ${MOCK_PARAMS} --bootstrap-chroot --init; then
+        break
+    fi
+
+    if [ "${RETRY}" -gt 1 ]; then
+        RETRY=$((RETRY - 1))
+        sleep 10
+    else
+        exit 1
+    fi
+done
 
 # build source package
 echo '***** Building source package' >&2
