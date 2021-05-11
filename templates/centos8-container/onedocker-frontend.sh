@@ -243,7 +243,7 @@ link_onedata()
 
 create_oneadmin_tmpfiles()
 {
-    systemd-tmpfiles --create /lib/tmpfiles.d/opennebula-common.conf
+    systemd-tmpfiles --create /lib/tmpfiles.d/opennebula-common.conf || :
 }
 
 restore_ssh_host_keys()
@@ -582,7 +582,7 @@ configure_sunstone()
         chown oneadmin:oneadmin /run/passenger
         chmod 0755 /run/passenger
 
-        systemd-tmpfiles --create /lib/tmpfiles.d/passenger.conf
+        systemd-tmpfiles --create /lib/tmpfiles.d/passenger.conf || :
 
         mkdir -p /run/httpd
         chown root:apache /run/httpd
